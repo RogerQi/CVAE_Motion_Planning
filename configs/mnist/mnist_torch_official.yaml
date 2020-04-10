@@ -1,0 +1,45 @@
+name: 'pytorch_mnist_lenet_w_dropout'
+task: 'classification'
+input_dim: (28, 28)
+num_classes: 10
+save_model: False
+
+SYSTEM:
+  use_cpu: false
+
+BACKBONE:
+  network: 'dropout_lenet'
+
+CLASSIFIER:
+  classifier: "log_softmax"
+
+LOSS:
+  loss: 'nll_loss'
+
+DATASET:
+  dataset: 'mnist'
+  TRANSFORM:
+    TRAIN:
+      transforms: ('normalize', )
+      TRANSFORMS_DETAILS:
+        NORMALIZE:
+          mean: (0.1307,)
+          sd: (0.3081,)
+    TEST:
+      transforms: ('normalize', )
+      TRANSFORMS_DETAILS:
+        NORMALIZE:
+          mean: (0.1307,)
+          sd: (0.3081,)
+
+TRAIN:
+  max_epochs: 14
+  batch_size: 64
+  initial_lr: 1.0
+  lr_scheduler: "step_down"
+  step_down_gamma: 0.7
+  step_down_on_epoch: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+
+
+TEST:
+  batch_size: 1000

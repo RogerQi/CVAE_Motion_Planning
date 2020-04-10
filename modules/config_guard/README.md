@@ -1,0 +1,23 @@
+# Params with a LOT of options
+
+- TASK
+    - classification
+    - detection
+    - autoencoder
+- BACKBONE
+    - network
+        - dropout_lenet
+        - vgg (TODO)
+        - resnet (TODO)
+- DATASET
+    - DATASET (specify which dataset to use)
+        - cifar10
+        - MNIST
+        - imagenet (TODO)
+        - cub200 (TODO)
+- TRAIN
+    - lr\_scheduler (specify learning rate decay method)
+        - None (no decay)
+        - step_down
+        - exponential
+        - cosine
