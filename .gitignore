@@ -1,5 +1,6 @@
 # User added
 # ipynb is usually large... use git add -f if necessary
+*.png
 *.ipynb
 .DS_Store
 *.pt

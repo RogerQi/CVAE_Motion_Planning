@@ -2,10 +2,6 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from matplotlib import patches
 
-from klampt import *
-from klampt.plan.cspace import CSpace,MotionPlan
-from klampt.math import vectorops
-
 import random
 import numpy as np
 
