@@ -15,11 +15,11 @@ class Circle(object):
         self.radius_squared = radius * radius
 
     def contains(self, p):
-        return np.square(self.center - p) <= self.radius_squared
+        return npla.norm(self.center - p) <= self.radius
 
     def collides(self, other):
         if isinstance(other,Circle):
-            return np.square(self.center - other.center) <= (self.radius + other.radius)**2
+            return npla.norm(self.center - other.center) <= (self.radius + other.radius)
         elif isinstance(other,Rectangle):
             return other.collides(self)
         else:
@@ -44,6 +44,12 @@ class Rectangle(object):
     def __init__(self, bmin, bmax):
         assert isinstance(bmin, tuple) or bmin.shape == (2,)
         assert isinstance(bmax, tuple) or bmin.shape == (2,)
+        # Standard CV coordinate
+        if bmin[0] >= bmax[0] or bmin[1] >= bmax[1]:
+            print(bmin)
+            print(bmax)
+        assert bmin[0] < bmax[0]
+        assert bmin[1] < bmax[1]
         self.bmin = bmin
         self.bmax = bmax
 
