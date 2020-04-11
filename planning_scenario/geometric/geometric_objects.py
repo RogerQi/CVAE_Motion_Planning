@@ -4,41 +4,63 @@ from matplotlib import patches
 
 import random
 import numpy as np
+import numpy.linalg as npla
 
-class Circle:
+class Circle(object):
     """A circle geometry.  Can collide with circles or rectangles."""
-    def __init__(self,center,radius):
+    def __init__(self, center, radius):
+        assert isinstance(center, tuple) or center.shape == (2,)
         self.center = center
         self.radius = radius
-    def contains(self,p):
-        return vectorops.distance(self.center,p) <= self.radius
-    def collides(self,other):
+        self.radius_squared = radius * radius
+
+    def contains(self, p):
+        return np.square(self.center - p) <= self.radius_squared
+
+    def collides(self, other):
         if isinstance(other,Circle):
-            return vectorops.distance(self.center,other.center) <= self.radius+other.radius
+            return np.square(self.center - other.center) <= (self.radius + other.radius)**2
         elif isinstance(other,Rectangle):
             return other.collides(self)
         else:
             raise ValueError("Circle can only collide with Circle or Rectangle")
-    def draw_matplotlib(self,ax,**args):
-        ax.add_patch(patches.Circle(self.center,self.radius,**args))
 
-class Rectangle:
-    def __init__(self,bmin,bmax):
+    def draw_matplotlib(self, ax, **args):
+        ax.add_patch(patches.Circle(self.center, self.radius, color = "k", **args))
+
+class Robot(Circle):
+    def __init__(self, center, radius, goal, id):
+        super(Robot, self).__init__(center, radius)
+        self.goal = goal
+        self.id = id
+
+    def draw_matplotlib(self, ax, **args):
+        ax.add_patch(patches.Circle(self.center, self.radius, color = "red", **args))
+        ax.text(self.center[0], self.center[1], str(self.id))
+        ax.add_patch(patches.Circle(self.goal, self.radius, color = "blue", **args))
+        ax.text(self.goal[0], self.goal[1], str(self.id))
+
+class Rectangle(object):
+    def __init__(self, bmin, bmax):
+        assert isinstance(bmin, tuple) or bmin.shape == (2,)
+        assert isinstance(bmax, tuple) or bmin.shape == (2,)
         self.bmin = bmin
         self.bmax = bmax
-    def contains(self,p):
+
+    def contains(self, p):
         return (self.bmin[0] <= p[0] <= self.bmax[0]) and (self.bmin[1] <= p[1] <= self.bmax[1])
-    def collides(self,other):
-        if isinstance(other,Circle):
-            closest = (max(self.bmin[0],min(other.center[0],self.bmax[0])),
-                       max(self.bmin[1],min(other.center[1],self.bmax[1])))
+
+    def collides(self, other):
+        if isinstance(other, Circle):
+            closest = (max(self.bmin[0], min(other.center[0], self.bmax[0])),
+                       max(self.bmin[1], min(other.center[1], self.bmax[1])))
             return other.contains(closest)
-        elif isinstance(other,Rectangle):
+        elif isinstance(other, Rectangle):
             return (other.bmin[0] <= self.bmin[0] != other.bmax[0] <= self.bmax[0]) and (other.bmin[1] <= self.bmin[1] != other.bmax[1] <= self.bmax[1])
         else:
             raise ValueError("Rectangle can only collide with Circle or Rectangle")
-    def draw_matplotlib(self,ax,**args):
-        ax.add_patch(patches.Rectangle(self.bmin,self.bmax[0]-self.bmin[0],self.bmax[1]-self.bmin[1],**args))
+    def draw_matplotlib(self, ax, **args):
+        ax.add_patch(patches.Rectangle(self.bmin, self.bmax[0]-self.bmin[0], self.bmax[1]-self.bmin[1], color = "k", **args))
 
 def create_obstacles(num):
     obstacles_collection = []
