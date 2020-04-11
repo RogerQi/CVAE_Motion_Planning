@@ -81,6 +81,9 @@ _C.TEST.batch_size = 256
 #######################
 _C.DATASET = CN()
 _C.DATASET.dataset = 'cifar10'
+_C.DATASET.NUMPY_READER = CN()
+_C.DATASET.NUMPY_READER.npy_path = "/"
+_C.DATASET.NUMPY_READER.data_shape = (-1, 28, 28)
 
 #######################
 # Transform Settings
