@@ -16,7 +16,7 @@ class world(object):
         self.obstacles = []
         self.robots = []
         self.initialize(num_robots, max_num_obstacles)
-        while not self.test(0, self.robots[0].center, True):
+        while not (self.test(0, self.robots[0].center, True) and self.test(0, self.robots[0].goal, True)):
             self.initialize(num_robots, max_num_obstacles)
 
     def initialize(self, num_robots, max_num_obstacles):
@@ -66,18 +66,21 @@ class world(object):
         cur_test_robot = self.robots[robot_id]
         # Test obstacle collision
         for o in self.obstacles:
-            if o.collides(cur_test_robot):
+            if o.robot_collides(robot_loc, cur_test_robot.radius):
                 return False
         if test_robot_collision:
             for r in range(len(self.robots)):
                 if r == robot_id: continue # cur testbot
-                if self.robots[r].collides(cur_test_robot):
+                if self.robots[r].robot_collides(robot_loc, cur_test_robot.radius):
                     return False
         return True
 
-    def plot(self):
+    def plot(self, soln = None):
         '''
         Use matplotlib to plot current world map for debugging purpose.
+
+        Args
+            soln: a list of numpy sequence denoting the path of robots
         '''
         plt.figure(figsize=(5, 5))
         plt.axis('equal')
@@ -87,6 +90,8 @@ class world(object):
             o.draw_matplotlib(plt.gca())
         for r in self.robots:
             r.draw_matplotlib(plt.gca())
+        if soln is not None:
+            raise NotImplementedError
         plt.show()
 
     def solve(self, solver):
@@ -95,9 +100,6 @@ class world(object):
         '''
         assert solver in ["rrt", "prm", "astar", "fmt"]
 
-from IPython import embed
-
 if __name__ == '__main__':
     test_world = world(1, 15)
     test_world.plot()
-    embed()

@@ -17,13 +17,8 @@ class Circle(object):
     def contains(self, p):
         return npla.norm(self.center - p) <= self.radius
 
-    def collides(self, other):
-        if isinstance(other,Circle):
-            return npla.norm(self.center - other.center) <= (self.radius + other.radius)
-        elif isinstance(other,Rectangle):
-            return other.collides(self)
-        else:
-            raise ValueError("Circle can only collide with Circle or Rectangle")
+    def robot_collides(self, robot_center, robot_radius):
+        return npla.norm(self.center - robot_center) <= (self.radius + robot_radius)
 
     def draw_matplotlib(self, ax, **args):
         ax.add_patch(patches.Circle(self.center, self.radius, color = "k", **args))
@@ -56,15 +51,11 @@ class Rectangle(object):
     def contains(self, p):
         return (self.bmin[0] <= p[0] <= self.bmax[0]) and (self.bmin[1] <= p[1] <= self.bmax[1])
 
-    def collides(self, other):
-        if isinstance(other, Circle):
-            closest = (max(self.bmin[0], min(other.center[0], self.bmax[0])),
-                       max(self.bmin[1], min(other.center[1], self.bmax[1])))
-            return other.contains(closest)
-        elif isinstance(other, Rectangle):
-            return (other.bmin[0] <= self.bmin[0] != other.bmax[0] <= self.bmax[0]) and (other.bmin[1] <= self.bmin[1] != other.bmax[1] <= self.bmax[1])
-        else:
-            raise ValueError("Rectangle can only collide with Circle or Rectangle")
+    def robot_collides(self, robot_center, robot_radius):
+        closest = np.array([max(self.bmin[0], min(robot_center[0], self.bmax[0])),
+                    max(self.bmin[1], min(robot_center[1], self.bmax[1]))])
+        return npla.norm(robot_center - closest) <= robot_radius
+
     def draw_matplotlib(self, ax, **args):
         ax.add_patch(patches.Rectangle(self.bmin, self.bmax[0]-self.bmin[0], self.bmax[1]-self.bmin[1], color = "k", **args))
 
