@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import config
 import geometric_objects as gobj
 
+from solver import astar
+
 class world(object):
     '''
     World that organizes everything for geometric planning problem.
@@ -16,7 +18,7 @@ class world(object):
         self.obstacles = []
         self.robots = []
         self.initialize(num_robots, max_num_obstacles)
-        while not (self.test(0, self.robots[0].center, True) and self.test(0, self.robots[0].goal, True)):
+        while not (self.test_one(0, self.robots[0].center, True) and self.test_one(0, self.robots[0].goal, True)):
             self.initialize(num_robots, max_num_obstacles)
 
     def initialize(self, num_robots, max_num_obstacles):
@@ -48,7 +50,7 @@ class world(object):
             # TODO: use solver to ensure this selection of start_pt and goal_pt is good.
             self.robots.append(gobj.Robot(start_pt, config.ROBOT_RADIUS, goal_pt, i))
 
-    def test(self, robot_id, robot_loc, test_robot_collision):
+    def test_one(self, robot_id, robot_loc, test_robot_collision):
         '''
         Test if the given robot_loc is free of collision. Return True if no collision;
         Otherwise return False
@@ -74,6 +76,19 @@ class world(object):
                 if self.robots[r].robot_collides(robot_loc, cur_test_robot.radius):
                     return False
         return True
+    
+    def test(self, robot_conf):
+        '''
+        Test the given robot_conf is collision-free.
+
+        Args:
+            robot_conf: np.array of shape (self.num_robots * 2,) that gives a configuration of robots
+        '''
+        my_robot_conf = robot_conf.reshape((-1, 2))
+        for i in range(my_robot_conf.shape[0]):
+            if not self.test_one(i, my_robot_conf[i], True):
+                return False
+        return True
 
     def plot(self, soln = None):
         '''
@@ -91,7 +106,8 @@ class world(object):
         for r in self.robots:
             r.draw_matplotlib(plt.gca())
         if soln is not None:
-            raise NotImplementedError
+            soln = np.array(soln).reshape((-1, 2))
+            plt.plot(soln[:,0], soln[:,1])
         plt.show()
 
     def solve(self, solver):
@@ -99,7 +115,13 @@ class world(object):
         Return solution using specified solver
         '''
         assert solver in ["rrt", "prm", "astar", "fmt"]
+        if solver == "astar":
+            ret = astar.astar_solve(self)
+            if ret is None:
+                print("No solution found!")
 
 if __name__ == '__main__':
-    test_world = world(1, 15)
-    test_world.plot()
+    test_world = world(1, 10)
+    astar_soln = test_world.solve("astar")
+    test_world.plot(astar_soln)
+    
