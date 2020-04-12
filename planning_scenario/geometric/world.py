@@ -17,8 +17,9 @@ class world(object):
         self.h, self.w = h, w
         self.obstacles = []
         self.robots = []
+        self.num_robots = num_robots
         self.initialize(num_robots, max_num_obstacles)
-        while not (self.test_one(0, self.robots[0].center, True) and self.test_one(0, self.robots[0].goal, True)):
+        while not (self.test(np.hstack([r.center for r in self.robots])) and self.test(np.hstack([r.goal for r in self.robots]))):
             self.initialize(num_robots, max_num_obstacles)
 
     def initialize(self, num_robots, max_num_obstacles):
@@ -47,7 +48,6 @@ class world(object):
         for i in range(num_robots):
             start_pt = np.random.random(size = (2,))
             goal_pt = np.random.random(size = (2,))
-            # TODO: use solver to ensure this selection of start_pt and goal_pt is good.
             self.robots.append(gobj.Robot(start_pt, config.ROBOT_RADIUS, goal_pt, i))
 
     def test_one(self, robot_id, robot_loc, test_robot_collision):
@@ -106,8 +106,9 @@ class world(object):
         for r in self.robots:
             r.draw_matplotlib(plt.gca())
         if soln is not None:
-            soln = np.array(soln).reshape((-1, 2))
-            plt.plot(soln[:,0], soln[:,1])
+            soln = np.array(soln).reshape((-1, self.num_robots, 2))
+            for i in range(self.num_robots):
+                plt.plot(soln[:,i,0], soln[:,i,1])
         plt.show()
 
     def solve(self, solver):
@@ -119,9 +120,11 @@ class world(object):
             ret = astar.astar_solve(self)
             if ret is None:
                 print("No solution found!")
+            return ret
 
 if __name__ == '__main__':
-    test_world = world(1, 10)
+    test_world = world(2, 10)
+    test_world.plot()
     astar_soln = test_world.solve("astar")
     test_world.plot(astar_soln)
     

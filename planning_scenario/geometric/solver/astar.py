@@ -46,13 +46,16 @@ def get_continous_coordinate(discrete_coord, eps, h = 1., w = 1.):
     continuous_coord[:,1] *= (eps / h)
     return continuous_coord.reshape((-1,))
 
-def euclidean_dist(cur_pt, other_pt):
-    return npla.norm(cur_pt - other_pt)
+def euclidean_dist(cur_state, other_state):
+    cur_state = cur_state.reshape((-1, 2))
+    other_state = other_state.reshape((-1, 2))
+    diff_state = cur_state - other_state
+    return npla.norm(diff_state, axis = 1)
 
 def heuristic(state, goal_state):
     # Change this function as long as it stays admissible
-    # Heuristic is an unconstraint 4D space
-    return euclidean_dist(state, goal_state)
+    # Heuristic is geodesic in an unconstraint ND space
+    return np.sum(euclidean_dist(state, goal_state))
 
 def construct_direction(total_entries):
     '''
@@ -91,7 +94,7 @@ def astar_solve(the_world, eps = 0.01):
     #####################
     # Setup
     #####################
-    goal_tolerance = 0
+    goal_tolerance = 3
     num_robots = len(the_world.robots)
     robot_radius = the_world.robots[0].radius
     # State indexing: [robot_id, x/y]
@@ -104,8 +107,11 @@ def astar_solve(the_world, eps = 0.01):
     visited_dict = {}
     possible_direction = construct_direction(cur_state.shape[0])
     possible_direction = [np.array(arr, dtype = "int") for arr in possible_direction]
+    min_h = 999999999
     while len(frontier) > 0:
         cur_node = heapq.heappop(frontier)
+        if cur_node.h < min_h:
+            min_h = cur_node.h
         # test if goal
         if npla.norm(cur_node.state - goal_state) <= goal_tolerance:
             # Back trace to extract node
@@ -122,6 +128,7 @@ def astar_solve(the_world, eps = 0.01):
             if not the_world.test(new_state_in_continuous_coord):
                 continue # collision detected!
             dist = euclidean_dist(cur_node.state, new_state)
+            dist = np.max(dist)
             goal_dist = heuristic(new_state, goal_state)
             new_node = node(new_state, cur_node, cur_node.g + dist, goal_dist)
             try:
