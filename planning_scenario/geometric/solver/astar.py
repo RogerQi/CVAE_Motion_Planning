@@ -29,6 +29,9 @@ class node(object):
         return (self > other) or (self == other)
 
     def __hash__(self):
+        '''
+        DEPRECATED
+        '''
         h.update(self.state)
         ret = h.intdigest()
         h.reset()
