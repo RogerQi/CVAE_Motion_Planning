@@ -13,7 +13,7 @@ class geometric_data_gen(object):
         self.num_robot = num_robot
         self.max_num_obstacles = max_num_obstacles
     
-    def infinite_gen(self, desired_num):
+    def infinite_gen(self, desired_num = np.iinfo(np.int).max):
         for i in range(desired_num):
             yield world.world(self.num_robot, self.max_num_obstacles)
 

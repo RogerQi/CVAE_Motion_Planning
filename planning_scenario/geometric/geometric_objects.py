@@ -22,6 +22,9 @@ class Circle(object):
 
     def draw_matplotlib(self, ax, **args):
         ax.add_patch(patches.Circle(self.center, self.radius, color = "k", **args))
+    
+    def get_parameter(self):
+        return [self.center, self.radius]
 
 class Robot(Circle):
     def __init__(self, center, radius, goal, id):
@@ -37,8 +40,10 @@ class Robot(Circle):
 
 class Rectangle(object):
     def __init__(self, bmin, bmax):
-        assert isinstance(bmin, tuple) or bmin.shape == (2,)
-        assert isinstance(bmax, tuple) or bmin.shape == (2,)
+        bmin = np.array(bmin)
+        bmax = np.array(bmax)
+        assert bmin.shape == (2,)
+        assert bmax.shape == (2,)
         # Standard CV coordinate
         if bmin[0] >= bmax[0] or bmin[1] >= bmax[1]:
             print(bmin)
@@ -58,6 +63,9 @@ class Rectangle(object):
 
     def draw_matplotlib(self, ax, **args):
         ax.add_patch(patches.Rectangle(self.bmin, self.bmax[0]-self.bmin[0], self.bmax[1]-self.bmin[1], color = "k", **args))
+    
+    def get_parameter(self):
+        return [self.bmin, self.bmax]
 
 def create_obstacles(num):
     obstacles_collection = []

@@ -5,30 +5,33 @@ import matplotlib.pyplot as plt
 
 import config
 import geometric_objects as gobj
+from base_world import base_world
 
 from solver import astar
 
-class world(object):
+class world(base_world):
     '''
     World that organizes everything for geometric planning problem.
     '''
-    def __init__(self, num_robots, max_num_obstacles, h = 1.0, w = 1.0):
+    def __init__(self, num_robots, max_num_obstacles, obstacle_type, h = 1.0, w = 1.0):
         assert h == 1.0 and w == 1.0 # should be scale to 1s
+        assert obstacle_type in ["circle", "rectangle"]
         self.h, self.w = h, w
         self.obstacles = []
         self.robots = []
+        self.soln_dict = {}
         self.num_robots = num_robots
-        self.initialize(num_robots, max_num_obstacles)
+        self.initialize(num_robots, max_num_obstacles, obstacle_type)
         while not (self.test(np.hstack([r.center for r in self.robots])) and self.test(np.hstack([r.goal for r in self.robots]))):
-            self.initialize(num_robots, max_num_obstacles)
+            self.initialize(num_robots, max_num_obstacles, obstacle_type)
 
-    def initialize(self, num_robots, max_num_obstacles):
+    def initialize(self, num_robots, max_num_obstacles, obstacle_type):
         # Initialize obstacles
         self.obstacles = []
         self.robots = []
         num_obs = random.randint(1, max_num_obstacles)
         for j in range(num_obs):
-            if random.randint(0,1):
+            if obstacle_type == "rectangle":
                 bmin = [1221, 0]
                 bmax = [0, 0]
                 while bmin[0] >= bmax[0] or bmin[1] >= bmax[1]:
@@ -120,11 +123,57 @@ class world(object):
             ret = astar.astar_solve(self)
             if ret is None:
                 print("No solution found!")
-            return ret
+        self.soln_dict[solver] = ret
+        return ret
+    
+    def get_trainable_data(self):
+        '''
+        Get data that can be used to train the motion planning CVAE
+
+        return
+            ret: a list that contains multiple data points.
+                Each data point can be interpreted in (X, cond) as in CVAE.
+        '''
+        assert self.soln_dict, "No solution? call world.solve first."
+        # Get conditional
+        # IMPORTANT: THIS MUST BE HANDLED CAREFULLY!
+        # current scheme: concatenate initial/goal/encoded obstacles
+        # obstacle encoding:
+        #   - rectangle: upperleft, lowerright
+        #   - circle: center + radius
+        # RECTANGLE AND CIRCLE MUST NOT APPEAR TOGETHER AS IT CONFUSES CVAE!!!
+        initial_conf = []
+        goal_conf = []
+        for r in self.robots:
+            cur_pos = r.center
+            goal_pos = r.goal
+            initial_conf.append(cur_pos)
+            goal_conf.append(goal_pos)
+        initial_conf = np.array(initial_conf).flatten()
+        goal_conf = np.array(goal_conf).flatten()
+        obstacle_encode = []
+        for obs in self.obstacles:
+            params = obs.get_parameter()
+            obstacle_encode.append(params)
+        obstacle_encode = np.array(obstacle_encode).flatten()
+        cond = [initial_conf, goal_conf, obstacle_encode]
+        cond = np.array(cond).flatten()
+        print(cond)
+        # Get solution
+        best_soln = self.get_best_soln()
+        best_soln = np.array(best_soln).reshape((-1, self.num_robots * 2))
+        ret = []
+        for sol_conf in best_soln:
+            ret.append((sol_conf, cond))
+        return ret
 
 if __name__ == '__main__':
-    test_world = world(2, 10)
+    test_world = world(2, 10, "rectangle")
     test_world.plot()
     astar_soln = test_world.solve("astar")
+    data = test_world.get_trainable_data()
+    print(data[0])
+    print(data[len(data) // 2])
+    print(data[-1]) # visually examine data
     test_world.plot(astar_soln)
     
