@@ -70,7 +70,7 @@ class narrow_world(base_geometric_world):
                     return False
         return True
 
-    def get_trainable_data(self):
+    def get_trainable_data(self, best_soln = None, sample_interval = 1):
         # Get Conditional
         # Get solution
         # Get conditional
@@ -100,11 +100,12 @@ class narrow_world(base_geometric_world):
         cond = [initial_conf, goal_conf, gap_encode]
         cond = np.concatenate(cond)
         # Get solution
-        best_soln = self.get_best_soln()
+        if best_soln is None:
+            best_soln = self.get_best_soln()
         best_soln = np.array(best_soln).reshape((-1, self.num_robots * 2))
         ret = []
-        for sol_conf in best_soln:
-            ret.append((sol_conf, cond))
+        for i in range(0, len(best_soln), sample_interval):
+            ret.append((best_soln[i], cond))
         return ret
 
 if __name__ == "__main__":
