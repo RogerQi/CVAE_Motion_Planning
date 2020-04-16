@@ -9,7 +9,7 @@ from base_world import base_world
 
 from solver import astar
 
-class world(base_world):
+class random_world(base_world):
     '''
     World that organizes everything for geometric planning problem.
     '''
@@ -168,7 +168,7 @@ class world(base_world):
         return ret
 
 if __name__ == '__main__':
-    test_world = world(2, 10, "rectangle")
+    test_world = random_world(2, 10, "rectangle")
     test_world.plot()
     astar_soln = test_world.solve("astar")
     data = test_world.get_trainable_data()

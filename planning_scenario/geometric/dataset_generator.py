@@ -6,22 +6,35 @@ import numpy as np
 
 from tqdm import tqdm
 
-import world
+import random_world
+import narrow_world
 
 class geometric_data_gen(object):
-    def __init__(self, num_robot, max_num_obstacles):
+    def __init__(self, num_robot, max_num_obstacles, world_type):
+        assert world_type in ["narrow", "random_rect", "random_circle"]
         self.num_robot = num_robot
         self.max_num_obstacles = max_num_obstacles
+        if world_type == "narrow":
+            self.callable_constructor = narrow_world.narrow_world
+            self.constructor_params = (self.num_robot, self.max_num_obstacles)
+        elif world_type == "random_rect":
+            self.callable_constructor = random_world.random_world
+            self.constructor_params = (self.num_robot, self.max_num_obstacles, "rectangle")
+        elif world_type == "random_circle":
+            self.callable_constructor = random_world.random_world
+            self.constructor_params = (self.num_robot, self.max_num_obstacles, "circle")
+        else:
+            raise NotImplementedError
     
     def infinite_gen(self, desired_num = np.iinfo(np.int).max):
         for i in range(desired_num):
-            yield world.world(self.num_robot, self.max_num_obstacles)
+            yield self.callable_constructor(*self.constructor_params)
 
 def main():
     n_trial = 10
     num_robots = 2
     max_obstacle_cnt = 10
-    my_gen = geometric_data_gen(num_robots, max_obstacle_cnt)
+    my_gen = geometric_data_gen(num_robots, max_obstacle_cnt, "random_rect")
     gen_time_sum = 0
     solve_time_sum = 0
     gen_start = time.time()
