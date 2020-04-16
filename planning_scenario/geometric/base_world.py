@@ -1,11 +1,15 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import geometric_objects as gobj
 import config
+
+from solver import astar
 
 class base_geometric_world(object):
     def __init__(self):
         self.obstacles = [] # instances of geometric objects.
         self.robots = []    # instances of gobj.robot
+        self.soln_dict = {}
         raise NotImplementedError
 
     def test_one(self, single_conf):
@@ -15,10 +19,31 @@ class base_geometric_world(object):
         raise NotImplementedError
 
     def plot(self, draw_ogrid = True, soln = None):
-        raise NotImplementedError
+        fig = plt.figure()
+        ax = fig.add_subplot(111, aspect = 'equal')
+        for o in self.obstacles:
+            o.draw_matplotlib(ax, alpha = 0.6)
+        for r in self.robots:
+            r.draw_matplotlib(ax)
+        if draw_ogrid:
+            self.draw_occupany_grid(ax, 20)
+        if soln is not None:
+            soln = np.array(soln).reshape((-1, self.num_robots, 2))
+            for i in range(self.num_robots):
+                ax.plot(soln[:,i,0], soln[:,i,1])
+        plt.show()
 
     def solve(self, solver):
-        raise NotImplementedError
+        '''
+        Return solution using specified solver
+        '''
+        assert solver in ["rrt", "prm", "astar", "fmt"]
+        if solver == "astar":
+            ret = astar.astar_solve(self)
+            if ret is None:
+                print("No solution found!")
+        self.soln_dict[solver] = ret
+        return ret
 
     def get_trainable_data(self):
         raise NotImplementedError

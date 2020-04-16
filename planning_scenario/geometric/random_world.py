@@ -7,8 +7,6 @@ import config
 import geometric_objects as gobj
 from base_world import base_geometric_world
 
-from solver import astar
-
 class random_world(base_geometric_world):
     '''
     World that organizes everything for geometric planning problem.
@@ -92,39 +90,6 @@ class random_world(base_geometric_world):
             if not self.test_one(i, my_robot_conf[i], True):
                 return False
         return True
-
-    def plot(self, draw_ogrid = True, soln = None):
-        '''
-        Use matplotlib to plot current world map for debugging purpose.
-
-        Args
-            soln: a list of numpy sequence denoting the path of robots
-        '''
-        fig = plt.figure()
-        ax = fig.add_subplot(111, aspect = 'equal')
-        for o in self.obstacles:
-            o.draw_matplotlib(ax, color = "k")
-        for r in self.robots:
-            r.draw_matplotlib(ax)
-        if draw_ogrid:
-            self.draw_occupany_grid(ax, 20)
-        if soln is not None:
-            soln = np.array(soln).reshape((-1, self.num_robots, 2))
-            for i in range(self.num_robots):
-                plt.plot(soln[:,i,0], soln[:,i,1])
-        plt.show()
-
-    def solve(self, solver):
-        '''
-        Return solution using specified solver
-        '''
-        assert solver in ["rrt", "prm", "astar", "fmt"]
-        if solver == "astar":
-            ret = astar.astar_solve(self)
-            if ret is None:
-                print("No solution found!")
-        self.soln_dict[solver] = ret
-        return ret
     
     def get_trainable_data(self):
         '''
@@ -175,5 +140,5 @@ if __name__ == '__main__':
     print(data[0])
     print(data[len(data) // 2])
     print(data[-1]) # visually examine data
-    test_world.plot(astar_soln)
+    test_world.plot(soln = astar_soln)
     

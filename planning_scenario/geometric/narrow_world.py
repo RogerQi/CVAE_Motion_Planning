@@ -8,8 +8,6 @@ import config
 import geometric_objects as gobj
 from base_world import base_geometric_world
 
-from solver import astar
-
 class narrow_world(base_geometric_world):
     def __init__(self, num_robots, gap_width_range = None):
         if gap_width_range is None:
@@ -19,6 +17,7 @@ class narrow_world(base_geometric_world):
         self.robots = []
         estimated_res = gap_width_range[0] + random.random() * (gap_width_range[1] - gap_width_range[0])
         self.initialize(estimated_res)
+        self.soln_dict = {}
         while not (self.test(np.hstack([r.center for r in self.robots])) and self.test(np.hstack([r.goal for r in self.robots]))):
             self.initialize(estimated_res)
     
@@ -70,21 +69,6 @@ class narrow_world(base_geometric_world):
                 if o.robot_collides(cur_robot_center, robot_radius):
                     return False
         return True
-            
-
-    def plot(self, draw_ogrid = True, soln = None):
-        fig = plt.figure()
-        ax = fig.add_subplot(111, aspect = 'equal')
-        for o in self.obstacles:
-            o.draw_matplotlib(ax, alpha = 0.6)
-        for r in self.robots:
-            r.draw_matplotlib(ax)
-        if draw_ogrid:
-            self.draw_occupany_grid(ax, 20)
-        plt.show()
-
-    def solve(self, solver):
-        pass
 
     def get_trainable_data(self):
         pass
@@ -92,3 +76,5 @@ class narrow_world(base_geometric_world):
 if __name__ == "__main__":
     test_world = narrow_world(1)
     test_world.plot()
+    astar_soln = test_world.solve("astar")
+    test_world.plot(soln = astar_soln)
