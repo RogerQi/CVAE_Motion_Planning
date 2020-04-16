@@ -45,24 +45,31 @@ class Rectangle(object):
         assert bmin.shape == (2,)
         assert bmax.shape == (2,)
         # Standard CV coordinate
-        if bmin[0] >= bmax[0] or bmin[1] >= bmax[1]:
+        assert bmin[0] <= bmax[0]
+        assert bmin[1] <= bmax[1]
+        if bmin[0] == bmax[0] or bmin[1] == bmax[1]:
+            print("New dummy object!")
             print(bmin)
             print(bmax)
-        assert bmin[0] < bmax[0]
-        assert bmin[1] < bmax[1]
+            self.dummy_obstacle = True
+        else:
+            self.dummy_obstacle = False
         self.bmin = bmin
         self.bmax = bmax
 
     def contains(self, p):
+        if self.dummy_obstacle: return False
         return (self.bmin[0] <= p[0] <= self.bmax[0]) and (self.bmin[1] <= p[1] <= self.bmax[1])
 
     def robot_collides(self, robot_center, robot_radius):
+        if self.dummy_obstacle: return False
         closest = np.array([max(self.bmin[0], min(robot_center[0], self.bmax[0])),
                     max(self.bmin[1], min(robot_center[1], self.bmax[1]))])
         return npla.norm(robot_center - closest) <= robot_radius
 
     def draw_matplotlib(self, ax, **args):
-        ax.add_patch(patches.Rectangle(self.bmin, self.bmax[0]-self.bmin[0], self.bmax[1]-self.bmin[1], color = "k", **args))
+        if self.dummy_obstacle: return
+        ax.add_patch(patches.Rectangle(self.bmin, self.bmax[0]-self.bmin[0], self.bmax[1]-self.bmin[1], **args))
     
     def get_parameter(self):
         return [self.bmin, self.bmax]

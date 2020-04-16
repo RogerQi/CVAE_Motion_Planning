@@ -105,7 +105,7 @@ class random_world(base_world):
         plt.xlim(0,1)
         plt.ylim(0,1)
         for o in self.obstacles:
-            o.draw_matplotlib(plt.gca())
+            o.draw_matplotlib(plt.gca(), color = "k")
         for r in self.robots:
             r.draw_matplotlib(plt.gca())
         if soln is not None:
