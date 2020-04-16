@@ -62,6 +62,11 @@ class narrow_world(base_geometric_world):
             robot_conf: np.array of shape (self.num_robots * 2,) that gives a configuration of robots
         '''
         my_robot_conf = robot_conf.reshape((-1, 2))
+        for robot_loc in my_robot_conf:
+            if robot_loc[0] < 0 or robot_loc[0] > 1:
+                return False # Out of bound
+            if robot_loc[1] < 0 or robot_loc[1] > 1:
+                return False
         for o in self.obstacles:
             for i in range(my_robot_conf.shape[0]):
                 cur_robot_center = my_robot_conf[i]
