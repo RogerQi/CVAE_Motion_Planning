@@ -48,9 +48,6 @@ class Rectangle(object):
         assert bmin[0] <= bmax[0]
         assert bmin[1] <= bmax[1]
         if bmin[0] == bmax[0] or bmin[1] == bmax[1]:
-            print("New dummy object!")
-            print(bmin)
-            print(bmax)
             self.dummy_obstacle = True
         else:
             self.dummy_obstacle = False

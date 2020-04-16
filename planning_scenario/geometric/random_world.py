@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 
 import config
 import geometric_objects as gobj
-from base_world import base_world
+from base_world import base_geometric_world
 
 from solver import astar
 
-class random_world(base_world):
+class random_world(base_geometric_world):
     '''
     World that organizes everything for geometric planning problem.
     '''
@@ -93,21 +93,21 @@ class random_world(base_world):
                 return False
         return True
 
-    def plot(self, soln = None):
+    def plot(self, draw_ogrid = True, soln = None):
         '''
         Use matplotlib to plot current world map for debugging purpose.
 
         Args
             soln: a list of numpy sequence denoting the path of robots
         '''
-        plt.figure(figsize=(5, 5))
-        plt.axis('equal')
-        plt.xlim(0,1)
-        plt.ylim(0,1)
+        fig = plt.figure()
+        ax = fig.add_subplot(111, aspect = 'equal')
         for o in self.obstacles:
-            o.draw_matplotlib(plt.gca(), color = "k")
+            o.draw_matplotlib(ax, color = "k")
         for r in self.robots:
-            r.draw_matplotlib(plt.gca())
+            r.draw_matplotlib(ax)
+        if draw_ogrid:
+            self.draw_occupany_grid(ax, 20)
         if soln is not None:
             soln = np.array(soln).reshape((-1, self.num_robots, 2))
             for i in range(self.num_robots):

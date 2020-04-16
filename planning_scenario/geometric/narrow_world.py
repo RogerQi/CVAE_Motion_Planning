@@ -6,11 +6,11 @@ from matplotlib import patches
 
 import config
 import geometric_objects as gobj
-from base_world import base_world
+from base_world import base_geometric_world
 
 from solver import astar
 
-class narrow_world(base_world):
+class narrow_world(base_geometric_world):
     def __init__(self, num_robots, gap_width_range = None):
         if gap_width_range is None:
             gap_width_range = (config.ROBOT_RADIUS * 1.5, config.ROBOT_RADIUS * 2.5)
@@ -72,18 +72,15 @@ class narrow_world(base_world):
         return True
             
 
-    def plot(self, soln = None):
+    def plot(self, draw_ogrid = True, soln = None):
         fig = plt.figure()
         ax = fig.add_subplot(111, aspect = 'equal')
         for o in self.obstacles:
             o.draw_matplotlib(ax, alpha = 0.6)
         for r in self.robots:
             r.draw_matplotlib(ax)
-        # for i in range(0,gridSize*gridSize): # plot occupancy grid
-        #     if occGrid[i] == 0:
-        #         plt.scatter(occGridSamples[i,0], occGridSamples[i,1], color="red", s=70, alpha=0.8)
-        #     else:
-        #         plt.scatter(occGridSamples[i,0], occGridSamples[i,1], color="green", s=70, alpha=0.8)
+        if draw_ogrid:
+            self.draw_occupany_grid(ax, 20)
         plt.show()
 
     def solve(self, solver):
