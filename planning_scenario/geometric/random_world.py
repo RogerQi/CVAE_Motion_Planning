@@ -122,8 +122,7 @@ class random_world(base_geometric_world):
             obstacle_encode.append(params)
         obstacle_encode = np.array(obstacle_encode).flatten()
         cond = [initial_conf, goal_conf, obstacle_encode]
-        cond = np.array(cond).flatten()
-        print(cond)
+        cond = np.concatenate(cond).flatten()
         # Get solution
         best_soln = self.get_best_soln()
         best_soln = np.array(best_soln).reshape((-1, self.num_robots * 2))
@@ -136,9 +135,6 @@ if __name__ == '__main__':
     test_world = random_world(2, 10, "rectangle")
     test_world.plot()
     astar_soln = test_world.solve("astar")
+    test_world.plot(soln = astar_soln)
     data = test_world.get_trainable_data()
     print(data[0])
-    print(data[len(data) // 2])
-    print(data[-1]) # visually examine data
-    test_world.plot(soln = astar_soln)
-    

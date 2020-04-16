@@ -71,10 +71,46 @@ class narrow_world(base_geometric_world):
         return True
 
     def get_trainable_data(self):
-        pass
+        # Get Conditional
+        # Get solution
+        # Get conditional
+        # IMPORTANT: THIS MUST BE HANDLED CAREFULLY!
+        # current scheme: concatenate initial/goal/encoded gap
+        # gap encoding: (xmin, ymin, xmax, ymax)
+        initial_conf = []
+        goal_conf = []
+        for r in self.robots:
+            cur_pos = r.center
+            goal_pos = r.goal
+            initial_conf.append(cur_pos)
+            goal_conf.append(goal_pos)
+        initial_conf = np.array(initial_conf).flatten()
+        goal_conf = np.array(goal_conf).flatten()
+        gap_encode = []
+        # lower left
+        gap_encode += [self.sample_pts[self.horizontal_first_gap_dis_lower_x], self.sample_pts[self.horizontal_obs_lower_y]]
+        gap_encode += [gap_encode[-2] + self.true_eps, gap_encode[-1] + self.true_eps]
+        # lower right
+        gap_encode += [self.sample_pts[self.horizontal_second_gap_dis_lower_x], self.sample_pts[self.horizontal_obs_lower_y]]
+        gap_encode += [gap_encode[-2] + self.true_eps, gap_encode[-1] + self.true_eps]
+        # upper
+        gap_encode += [self.sample_pts[self.vertical_obs_lower_x], self.sample_pts[self.vertical_obs_gap_dis_lower_y]]
+        gap_encode += [gap_encode[-2] + self.true_eps, gap_encode[-1] + self.true_eps]
+        gap_encode = np.array(gap_encode).flatten()
+        cond = [initial_conf, goal_conf, gap_encode]
+        cond = np.concatenate(cond)
+        # Get solution
+        best_soln = self.get_best_soln()
+        best_soln = np.array(best_soln).reshape((-1, self.num_robots * 2))
+        ret = []
+        for sol_conf in best_soln:
+            ret.append((sol_conf, cond))
+        return ret
 
 if __name__ == "__main__":
     test_world = narrow_world(1)
     test_world.plot()
     astar_soln = test_world.solve("astar")
     test_world.plot(soln = astar_soln)
+    data = test_world.get_trainable_data()
+    print(data[0])
