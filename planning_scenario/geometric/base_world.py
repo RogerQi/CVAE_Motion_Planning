@@ -67,7 +67,8 @@ class base_geometric_world(object):
 
     def get_best_soln(self):
         try:
-            return self.soln_dict['astar']
+            ret = self.soln_dict['astar']
+            return ret
         except KeyError:
             pass
         raise NotImplementedError

@@ -11,7 +11,7 @@ from base_world import base_geometric_world
 class narrow_world(base_geometric_world):
     def __init__(self, num_robots, gap_width_range = None):
         if gap_width_range is None:
-            gap_width_range = (config.ROBOT_RADIUS * 1.5, config.ROBOT_RADIUS * 2.5)
+            gap_width_range = (config.ROBOT_RADIUS * 3, config.ROBOT_RADIUS * 3.5)
         assert gap_width_range[0] > config.ROBOT_RADIUS, "obstacle width too small!"
         self.num_robots = num_robots
         self.robots = []
