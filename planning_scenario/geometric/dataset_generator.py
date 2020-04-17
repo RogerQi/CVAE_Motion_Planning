@@ -85,7 +85,7 @@ class geometric_data_gen(object):
             p.join()
 
 def main():
-    n_datapoints = 1000
+    n_datapoints = 10000
     num_robots = 1
     num_worker = 8
     max_obstacle_cnt = 10

@@ -9,19 +9,19 @@ import geometric_objects as gobj
 from base_world import base_geometric_world
 
 class narrow_world(base_geometric_world):
-    def __init__(self, num_robots, gap_width_range = None):
+    def __init__(self, num_robots, gap_width_range = None, random_init = False):
         if gap_width_range is None:
             gap_width_range = (config.ROBOT_RADIUS * 3, config.ROBOT_RADIUS * 3.5)
         assert gap_width_range[0] > config.ROBOT_RADIUS, "obstacle width too small!"
         self.num_robots = num_robots
         self.robots = []
         estimated_res = gap_width_range[0] + random.random() * (gap_width_range[1] - gap_width_range[0])
-        self.initialize(estimated_res)
+        self.initialize(estimated_res, random_init)
         self.soln_dict = {}
         while not (self.test(np.hstack([r.center for r in self.robots])) and self.test(np.hstack([r.goal for r in self.robots]))):
-            self.initialize(estimated_res)
+            self.initialize(estimated_res, random_init)
     
-    def initialize(self, eps, random_init = True):
+    def initialize(self, eps, random_init):
         self.robots = []
         # Initialize obstacles
         res_cnt = int(1. / eps)
@@ -48,11 +48,19 @@ class narrow_world(base_geometric_world):
         # Initialize robots
         if random_init:
             for i in range(self.num_robots):
-                start_pt = np.random.random(size = (2,))
-                goal_pt = np.random.random(size = (2,))
+                start_pt = np.random.uniform(low = 0., high = 1., size = (2,))
+                goal_pt = np.random.uniform(low = 0., high = 1., size = (2,))
                 self.robots.append(gobj.Robot(start_pt, config.ROBOT_RADIUS, goal_pt, i))
         else:
-            pass
+            # initialize robots at lower left and goals at lower right...
+            for i in range(self.num_robots):
+                start_x = np.random.uniform(low = 0., high = self.sample_pts[self.vertical_obs_lower_x] - config.ROBOT_RADIUS)
+                start_y = np.random.uniform(low = 0., high = self.sample_pts[self.horizontal_obs_lower_y] - config.ROBOT_RADIUS)
+                goal_x = np.random.uniform(low = self.sample_pts[self.vertical_obs_lower_x + 1] + config.ROBOT_RADIUS, high = 1.)
+                goal_y = np.random.uniform(low = 0., high = self.sample_pts[self.horizontal_obs_lower_y] - config.ROBOT_RADIUS)
+                start_pt = np.array([start_x, start_y])
+                goal_pt = np.array([goal_x, goal_y])
+                self.robots.append(gobj.Robot(start_pt, config.ROBOT_RADIUS, goal_pt, i))
 
     def test(self, robot_conf):
         '''
