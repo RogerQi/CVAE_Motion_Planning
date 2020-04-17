@@ -50,7 +50,7 @@ _C.CLASSIFIER.bias = False
 #######################
 _C.LOSS = CN()
 _C.LOSS.loss = "none"
-_C.LOSS.loss_factor = 0
+_C.LOSS.loss_factor = 1.
 
 #######################
 # Training Settings
@@ -82,8 +82,11 @@ _C.TEST.batch_size = 256
 _C.DATASET = CN()
 _C.DATASET.dataset = 'cifar10'
 _C.DATASET.NUMPY_READER = CN()
-_C.DATASET.NUMPY_READER.npy_path = "/"
-_C.DATASET.NUMPY_READER.data_shape = (-1, 28, 28)
+_C.DATASET.NUMPY_READER.train_data_npy_path = "/"
+_C.DATASET.NUMPY_READER.train_label_npy_path = "/"
+_C.DATASET.NUMPY_READER.test_data_npy_path = "/"
+_C.DATASET.NUMPY_READER.test_label_npy_path = "/"
+_C.DATASET.NUMPY_READER.mmap = False
 
 #######################
 # Transform Settings

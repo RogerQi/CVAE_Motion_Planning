@@ -16,6 +16,7 @@ class cross_entropy(nn.Module):
 class naive_VAE(nn.Module):
     def __init__(self, cfg):
         super().__init__()
+        self.kl_div_factor = cfg.LOSS.loss_factor
     
     def forward(self, output, original_input, aux_dict):
         # Sanity check
@@ -27,4 +28,4 @@ class naive_VAE(nn.Module):
         bce_loss = F.binary_cross_entropy(output, original_input, reduction = "sum")
         # KL Divergence between model estimated distribution and N(0, 1)
         kl_div_loss = 0.5 * torch.sum((torch.exp(log_var_vec)) + (mu_vec.pow(2)) - 1 - log_var_vec)
-        return bce_loss + kl_div_loss
+        return bce_loss + self.kl_div_factor * kl_div_loss
