@@ -1,6 +1,10 @@
 ## Motion Planning with CVAE
 
-Reproduction of https://arxiv.org/abs/1709.05448
+Reproduction of B. Ichter, J. Harrison and M. Pavone, ”Learning Sampling Distributions
+for Robot Motion Planning,” _2018 IEEE International Conference on
+Robotics and Automation (ICRA)_, Brisbane, QLD, 2018, pp. 7087-7094.
+
+Retrieved from https://arxiv.org/abs/1709.05448
 
 TODOs
 - Speed up collision detection
