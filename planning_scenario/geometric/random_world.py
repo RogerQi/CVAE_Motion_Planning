@@ -3,9 +3,9 @@ import numpy as np
 import numpy.linalg as npla
 import matplotlib.pyplot as plt
 
-import config
-import geometric_objects as gobj
-from base_world import base_geometric_world
+from .config import ROBOT_RADIUS
+from .geometric_objects import Rectangle, Circle, Robot
+from .base_world import base_geometric_world
 
 class random_world(base_geometric_world):
     '''
@@ -39,17 +39,17 @@ class random_world(base_geometric_world):
                     height = random.random() * (1 - min_y - 1e-5)
                     bmin = (min_x, min_y)
                     bmax = (min_x + width, min_y + height)
-                self.obstacles.append(gobj.Rectangle(bmin, bmax))
+                self.obstacles.append(Rectangle(bmin, bmax))
             else:
                 rand_center = (round(random.random(), 3), round(random.random(), 3))
                 radius_limit = [rand_center[0], 1 - rand_center[0], rand_center[1], 1 - rand_center[1]]
                 rand_radius = round(random.uniform(0, min(radius_limit)), 3)
-                self.obstacles.append(gobj.Circle(rand_center,rand_radius))
+                self.obstacles.append(Circle(rand_center,rand_radius))
         # Initialize start state and goal state
         for i in range(num_robots):
             start_pt = np.random.random(size = (2,))
             goal_pt = np.random.random(size = (2,))
-            self.robots.append(gobj.Robot(start_pt, config.ROBOT_RADIUS, goal_pt, i))
+            self.robots.append(Robot(start_pt, ROBOT_RADIUS, goal_pt, i))
 
     def test_one(self, robot_id, robot_loc, test_robot_collision):
         '''

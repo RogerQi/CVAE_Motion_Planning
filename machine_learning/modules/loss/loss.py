@@ -25,7 +25,8 @@ class naive_VAE(nn.Module):
         assert output.shape == original_input.shape
         assert mu_vec.shape == log_var_vec.shape
         # Calculate losses
-        bce_loss = F.binary_cross_entropy(output, original_input, reduction = "sum")
+        # bce_loss = F.binary_cross_entropy(output, original_input, reduction = "sum")
+        bce_loss = F.mse_loss(output, original_input, reduction = "sum")
         # KL Divergence between model estimated distribution and N(0, 1)
         kl_div_loss = 0.5 * torch.sum((torch.exp(log_var_vec)) + (mu_vec.pow(2)) - 1 - log_var_vec)
         return bce_loss + self.kl_div_factor * kl_div_loss

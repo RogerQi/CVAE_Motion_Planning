@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import geometric_objects as gobj
-import config
+from .config import ROBOT_RADIUS
 
-from solver import astar
+from .solver import astar
 
 class base_geometric_world(object):
     def __init__(self):
@@ -18,9 +17,10 @@ class base_geometric_world(object):
     def test(self, robot_conf):
         raise NotImplementedError
 
-    def plot(self, draw_ogrid = True, soln = None):
-        fig = plt.figure()
-        ax = fig.add_subplot(111, aspect = 'equal')
+    def plot(self, ax = None, draw_ogrid = True, soln = None):
+        if ax is None:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, aspect = 'equal')
         for o in self.obstacles:
             o.draw_matplotlib(ax, alpha = 0.6)
         for r in self.robots:
@@ -31,7 +31,8 @@ class base_geometric_world(object):
             soln = np.array(soln).reshape((-1, self.num_robots, 2))
             for i in range(self.num_robots):
                 ax.plot(soln[:,i,0], soln[:,i,1])
-        plt.show()
+        if ax is None:
+            plt.show()
 
     def solve(self, solver):
         '''
@@ -51,7 +52,7 @@ class base_geometric_world(object):
     def draw_occupany_grid(self, ax, num_samples):
         def test_pseudo_robot(cur_conf):
             for o in self.obstacles:
-                if o.robot_collides(cur_conf, config.ROBOT_RADIUS):
+                if o.robot_collides(cur_conf, ROBOT_RADIUS):
                     return False
             return True
         x_sample = np.linspace(0, 1, num_samples)

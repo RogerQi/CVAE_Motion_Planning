@@ -1,0 +1,43 @@
+name: 'cvae_motion_planning_narrow_with_naive_vae'
+task: 'auto_encoder'
+# coordinate
+input_dim: (1, 6)
+# conditional dim
+num_classes: 21
+save_model: True
+
+SYSTEM:
+  use_cpu: false
+
+BACKBONE:
+  network: 'naive_vae'
+  forward_need_label: True
+  AUTO_ENCODER:
+    conditional: True
+
+CLASSIFIER:
+  classifier: "identity"
+
+LOSS:
+  loss: 'naive_vae'
+  loss_factor: 1e-3
+
+DATASET:
+  dataset: 'numpy'
+  NUMPY_READER:
+    train_data_npy_path: "/home/roger/LearnedSamplingDistributions/x_train.npy"
+    train_label_npy_path: "/home/roger/LearnedSamplingDistributions/c_train.npy"
+    test_data_npy_path: "/home/roger/LearnedSamplingDistributions/x_test.npy"
+    test_label_npy_path: "/home/roger/LearnedSamplingDistributions/c_test.npy"
+
+TRAIN:
+  max_epochs: 14
+  batch_size: 64
+  initial_lr: 1.0
+  lr_scheduler: "step_down"
+  step_down_gamma: 0.78
+  step_down_on_epoch: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+
+
+TEST:
+  batch_size: 1000

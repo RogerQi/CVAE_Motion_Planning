@@ -16,22 +16,22 @@ class net(nn.Module):
             input_size = datum_size + self.num_classes
         else:
             input_size = datum_size
-        self.linear1 = nn.Linear(input_size, 500)
+        self.linear1 = nn.Linear(input_size, 512)
         self.relu1 = nn.ReLU()
-        self.linear2 = nn.Linear(500, 120)
+        self.linear2 = nn.Linear(512, 512)
         self.relu2 = nn.ReLU()
-        self.linear3_mu = nn.Linear(120, 30)
-        self.linear3_log_var = nn.Linear(120, 30)
+        self.linear3_mu = nn.Linear(512, 3)
+        self.linear3_log_var = nn.Linear(512, 3)
         # sampling happens here
         self.standard_normal = torch.distributions.normal.Normal(0, 1)
         if self.conditional:
-            self.inv_linear3 = nn.Linear(30 + self.num_classes, 120)
+            self.inv_linear3 = nn.Linear(3 + self.num_classes, 512)
         else:
-            self.inv_linear3 = nn.Linear(30, 120)
+            self.inv_linear3 = nn.Linear(3, 512)
         self.inv_relu2 = nn.ReLU()
-        self.inv_linear2 = nn.Linear(120, 500)
+        self.inv_linear2 = nn.Linear(512, 512)
         self.inv_relu1 = nn.ReLU()
-        self.inv_linear1 = nn.Linear(500, datum_size)
+        self.inv_linear1 = nn.Linear(512, datum_size)
     
     def encode(self, x, gt_label = None):
         x = torch.flatten(x, start_dim = 1)

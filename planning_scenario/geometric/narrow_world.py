@@ -4,15 +4,15 @@ import numpy.linalg as npla
 import matplotlib.pyplot as plt
 from matplotlib import patches
 
-import config
-import geometric_objects as gobj
-from base_world import base_geometric_world
+from .config import ROBOT_RADIUS
+from .geometric_objects import Rectangle, Circle, Robot
+from .base_world import base_geometric_world
 
 class narrow_world(base_geometric_world):
     def __init__(self, num_robots, gap_width_range = None, random_init = False):
         if gap_width_range is None:
-            gap_width_range = (config.ROBOT_RADIUS * 3, config.ROBOT_RADIUS * 3.5)
-        assert gap_width_range[0] > config.ROBOT_RADIUS, "obstacle width too small!"
+            gap_width_range = (ROBOT_RADIUS * 3, ROBOT_RADIUS * 3.5)
+        assert gap_width_range[0] > ROBOT_RADIUS, "obstacle width too small!"
         self.num_robots = num_robots
         self.robots = []
         estimated_res = gap_width_range[0] + random.random() * (gap_width_range[1] - gap_width_range[0])
@@ -33,15 +33,15 @@ class narrow_world(base_geometric_world):
         self.horizontal_first_gap_dis_lower_x = random.randint(0, self.vertical_obs_lower_x - 1)
         self.horizontal_second_gap_dis_lower_x = random.randint(self.vertical_obs_lower_x + 1, res_cnt - 2)
         self.vertical_obs_gap_dis_lower_y = random.randint(self.horizontal_obs_lower_y + 1, res_cnt - 2)
-        horizontal_left_obstacle = gobj.Rectangle((0, self.sample_pts[self.horizontal_obs_lower_y]),
+        horizontal_left_obstacle = Rectangle((0, self.sample_pts[self.horizontal_obs_lower_y]),
             (self.sample_pts[self.horizontal_first_gap_dis_lower_x], self.sample_pts[self.horizontal_obs_lower_y + 1]))
-        horizontal_middle_obstacle = gobj.Rectangle((self.sample_pts[self.horizontal_first_gap_dis_lower_x + 1], self.sample_pts[self.horizontal_obs_lower_y]),
+        horizontal_middle_obstacle = Rectangle((self.sample_pts[self.horizontal_first_gap_dis_lower_x + 1], self.sample_pts[self.horizontal_obs_lower_y]),
             (self.sample_pts[self.horizontal_second_gap_dis_lower_x], self.sample_pts[self.horizontal_obs_lower_y + 1]))
-        horizontal_right_obstacle = gobj.Rectangle((self.sample_pts[self.horizontal_second_gap_dis_lower_x + 1], self.sample_pts[self.horizontal_obs_lower_y]),
+        horizontal_right_obstacle = Rectangle((self.sample_pts[self.horizontal_second_gap_dis_lower_x + 1], self.sample_pts[self.horizontal_obs_lower_y]),
             (self.sample_pts[-1], self.sample_pts[self.horizontal_obs_lower_y + 1]))
-        vertical_lower_obstacle = gobj.Rectangle((self.sample_pts[self.vertical_obs_lower_x], self.sample_pts[0]),
+        vertical_lower_obstacle = Rectangle((self.sample_pts[self.vertical_obs_lower_x], self.sample_pts[0]),
             (self.sample_pts[self.vertical_obs_lower_x + 1], self.sample_pts[self.vertical_obs_gap_dis_lower_y]))
-        vertical_higher_obstacle = gobj.Rectangle((self.sample_pts[self.vertical_obs_lower_x], self.sample_pts[self.vertical_obs_gap_dis_lower_y + 1]),
+        vertical_higher_obstacle = Rectangle((self.sample_pts[self.vertical_obs_lower_x], self.sample_pts[self.vertical_obs_gap_dis_lower_y + 1]),
             (self.sample_pts[self.vertical_obs_lower_x + 1], self.sample_pts[-1]))
         self.obstacles = [horizontal_left_obstacle, horizontal_middle_obstacle, horizontal_right_obstacle,
             vertical_lower_obstacle, vertical_higher_obstacle]
@@ -50,17 +50,17 @@ class narrow_world(base_geometric_world):
             for i in range(self.num_robots):
                 start_pt = np.random.uniform(low = 0., high = 1., size = (2,))
                 goal_pt = np.random.uniform(low = 0., high = 1., size = (2,))
-                self.robots.append(gobj.Robot(start_pt, config.ROBOT_RADIUS, goal_pt, i))
+                self.robots.append(Robot(start_pt, ROBOT_RADIUS, goal_pt, i))
         else:
             # initialize robots at lower left and goals at lower right...
             for i in range(self.num_robots):
-                start_x = np.random.uniform(low = 0., high = self.sample_pts[self.vertical_obs_lower_x] - config.ROBOT_RADIUS)
-                start_y = np.random.uniform(low = 0., high = self.sample_pts[self.horizontal_obs_lower_y] - config.ROBOT_RADIUS)
-                goal_x = np.random.uniform(low = self.sample_pts[self.vertical_obs_lower_x + 1] + config.ROBOT_RADIUS, high = 1.)
-                goal_y = np.random.uniform(low = 0., high = self.sample_pts[self.horizontal_obs_lower_y] - config.ROBOT_RADIUS)
+                start_x = np.random.uniform(low = 0., high = self.sample_pts[self.vertical_obs_lower_x] - ROBOT_RADIUS)
+                start_y = np.random.uniform(low = 0., high = self.sample_pts[self.horizontal_obs_lower_y] - ROBOT_RADIUS)
+                goal_x = np.random.uniform(low = self.sample_pts[self.vertical_obs_lower_x + 1] + ROBOT_RADIUS, high = 1.)
+                goal_y = np.random.uniform(low = 0., high = self.sample_pts[self.horizontal_obs_lower_y] - ROBOT_RADIUS)
                 start_pt = np.array([start_x, start_y])
                 goal_pt = np.array([goal_x, goal_y])
-                self.robots.append(gobj.Robot(start_pt, config.ROBOT_RADIUS, goal_pt, i))
+                self.robots.append(Robot(start_pt, ROBOT_RADIUS, goal_pt, i))
 
     def test(self, robot_conf):
         '''
