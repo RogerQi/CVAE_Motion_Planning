@@ -4,9 +4,9 @@ import numpy.linalg as npla
 import matplotlib.pyplot as plt
 from matplotlib import patches
 
-from .config import ROBOT_RADIUS
-from .geometric_objects import Rectangle, Circle, Robot
-from .base_world import base_geometric_world
+from config import ROBOT_RADIUS
+from geometric_objects import Rectangle, Circle, Robot
+from base_world import base_geometric_world
 
 class narrow_world(base_geometric_world):
     def __init__(self, num_robots, gap_width_range = None, random_init = False):

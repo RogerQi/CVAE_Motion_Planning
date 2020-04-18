@@ -3,9 +3,9 @@ import numpy as np
 import numpy.linalg as npla
 import matplotlib.pyplot as plt
 
-from .config import ROBOT_RADIUS
-from .geometric_objects import Rectangle, Circle, Robot
-from .base_world import base_geometric_world
+from config import ROBOT_RADIUS
+from geometric_objects import Rectangle, Circle, Robot
+from base_world import base_geometric_world
 
 class random_world(base_geometric_world):
     '''

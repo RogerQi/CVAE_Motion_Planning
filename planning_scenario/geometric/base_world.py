@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from .config import ROBOT_RADIUS
+from config import ROBOT_RADIUS
 
-from .solver import astar
+from solver import astar
 
 class base_geometric_world(object):
     def __init__(self):
