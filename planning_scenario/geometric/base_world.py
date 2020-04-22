@@ -17,8 +17,9 @@ class base_geometric_world(object):
     def test(self, robot_conf):
         raise NotImplementedError
 
-    def plot(self, ax = None, draw_ogrid = True, soln = None):
-        if ax is None:
+    def plot(self, _ax = None, draw_ogrid = True, soln = None):
+        ax = _ax
+        if _ax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111, aspect = 'equal')
         for o in self.obstacles:
@@ -31,7 +32,7 @@ class base_geometric_world(object):
             soln = np.array(soln).reshape((-1, self.num_robots, 2))
             for i in range(self.num_robots):
                 ax.plot(soln[:,i,0], soln[:,i,1])
-        if ax is None:
+        if _ax is None:
             plt.show()
 
     def solve(self, solver):

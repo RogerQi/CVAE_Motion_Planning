@@ -28,15 +28,6 @@ class node(object):
     def __ge__(self, other):
         return (self > other) or (self == other)
 
-    def __hash__(self):
-        '''
-        DEPRECATED
-        '''
-        h.update(self.state)
-        ret = h.intdigest()
-        h.reset()
-        return ret
-
 def get_discrete_coordinate(continuous_coord, eps, h = 1., w = 1.):
     discrete_coord = continuous_coord.copy().reshape((-1, 2))
     discrete_coord[:,0] *= int(w / eps)
@@ -81,9 +72,54 @@ def get_np_arr_hash(np_arr):
     h.reset()
     return ret
 
+def astar_base(start_conf, adj_func, test_goal_func, test_cfree_func, g_func, h_func):
+    '''
+    Abstract A* solver.
+
+    Args:
+        start_conf: a numpy array representing start configuration. Assumed collision-free.
+        adj_func: pointer to a function such that, when called with a configuration as parameter,
+            it returns potential candidates to be explored. Note that the returned value is not
+            necessarily collision free.
+        test_goal_func: pointer to a function which returns True if given configuration
+            can be considered as goal; False otherwise.
+        test_cfree_func: pointer to a function which tests if given configuration is collision-free.
+        g_func: cost function that gives the edge weight between two configuration
+        h_func: heuristic function that computes the heuristic of any configuration. Note that
+            it does not necessarily need to be admissible.
+    '''
+    initial_h = h_func(start_conf)
+    frontier = [node(start_conf, None, 0, initial_h)]
+    visited_dict = {}
+    while len(frontier) > 0:
+        cur_node = heapq.heappop(frontier)
+        # test if goal
+        if test_goal_func(cur_node.state):
+            # Back trace to extract node
+            ret = []
+            while cur_node is not None:
+                ret.append(cur_node.state)
+                cur_node = cur_node.parent
+            # reverse to start
+            ret = ret[::-1]
+            return ret
+        # Keep expanding...
+        for new_state in adj_func(cur_node.state):
+            state_hash_key = get_np_arr_hash(new_state)
+            if state_hash_key in visited_dict:
+                continue # Already visited this node
+            if not test_cfree_func(new_state):
+                continue # collision detected!
+            edge_cost = g_func(cur_node.state, new_state)
+            goal_h = h_func(new_state)
+            new_node = node(new_state, cur_node, cur_node.g + edge_cost, goal_h)
+            visited_dict[get_np_arr_hash(new_node.state)] = True
+            heapq.heappush(frontier, new_node)
+    return None
+
 def astar_solve(the_world, eps = 0.01):
     '''
-    On-the-fly astart solver
+    On-the-fly A* solver
 
     Args:
         the_world: a world object as defined in world.py
@@ -101,47 +137,40 @@ def astar_solve(the_world, eps = 0.01):
     num_robots = len(the_world.robots)
     robot_radius = the_world.robots[0].radius
     # State indexing: [robot_id, x/y]
-    cur_state = np.hstack([r.center for r in the_world.robots])
+    initial_state = np.hstack([r.center for r in the_world.robots])
     goal_state = np.hstack([r.goal for r in the_world.robots])
-    cur_state = get_discrete_coordinate(cur_state, eps)
+    initial_state = get_discrete_coordinate(initial_state, eps)
     goal_state = get_discrete_coordinate(goal_state, eps)
-    initial_h = heuristic(cur_state, goal_state)
-    frontier = [node(cur_state, None, 0, initial_h)] # to be used in heapq
-    visited_dict = {}
-    possible_direction = construct_direction(cur_state.shape[0])
+
+    def g_func(conf_a, conf_b):
+        dist = euclidean_dist(conf_a, conf_b)
+        return np.max(dist)
+
+    def h_func(cur_conf):
+        return heuristic(cur_conf, goal_state)
+
+    possible_direction = construct_direction(initial_state.shape[0])
     possible_direction = [np.array(arr, dtype = "int") for arr in possible_direction]
-    min_h = 999999999
-    while len(frontier) > 0:
-        cur_node = heapq.heappop(frontier)
-        if cur_node.h < min_h:
-            min_h = cur_node.h
-        # test if goal
-        if npla.norm(cur_node.state - goal_state) <= goal_tolerance:
-            # Back trace to extract node
-            ret = []
-            while cur_node is not None:
-                ret.append(cur_node.state)
-                cur_node = cur_node.parent
-            ret = ret[::-1]
-            return [get_continous_coordinate(s, eps) for s in ret]
-        # Keep expanding...
+
+    def adj_func(cur_conf):
         for offset_dir in possible_direction:
-            new_state = cur_node.state + offset_dir
-            new_state_in_continuous_coord = get_continous_coordinate(new_state, eps)
-            if not the_world.test(new_state_in_continuous_coord):
-                continue # collision detected!
-            dist = euclidean_dist(cur_node.state, new_state)
-            dist = np.max(dist)
-            goal_dist = heuristic(new_state, goal_state)
-            new_node = node(new_state, cur_node, cur_node.g + dist, goal_dist)
-            try:
-                visited_dict[get_np_arr_hash(new_node.state)]
-                continue
-            except KeyError:
-                pass
-            visited_dict[get_np_arr_hash(new_node.state)] = True
-            heapq.heappush(frontier, new_node)
-    return None
+            new_state = cur_conf + offset_dir
+            yield new_state
+
+    def test_goal_func(cur_conf):
+        return npla.norm(cur_conf - goal_state) <= goal_tolerance
+
+    def test_cfree_func(cur_conf):
+        state_in_continuous_coord = get_continous_coordinate(cur_conf, eps)
+        return the_world.test(state_in_continuous_coord)
+
+    soln = astar_base(initial_state, adj_func, test_goal_func, test_cfree_func, g_func, h_func)
+    if soln is not None:
+        return [get_continous_coordinate(s, eps) for s in soln]
+    else:
+        # No solution found
+        return None
+    
 
 if __name__ == "__main__":
     a = node(np.ones((4,)), None, 1, 1)
