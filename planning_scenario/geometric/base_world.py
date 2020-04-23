@@ -44,6 +44,12 @@ class base_geometric_world(object):
             ret = solver_wrapper.astar_solve(self)
             if ret is None:
                 print("No solution found!")
+        elif solver == "rrt":
+            ret = solver_wrapper.rrt_solve(self)
+            if ret is None:
+                print("No solution found!")
+        else:
+            raise NotImplementedError
         self.soln_dict[solver] = ret
         return ret
 
@@ -70,6 +76,11 @@ class base_geometric_world(object):
     def get_best_soln(self):
         try:
             ret = self.soln_dict['astar']
+            return ret
+        except KeyError:
+            pass
+        try:
+            ret = self.soln_dict['rrt']
             return ret
         except KeyError:
             pass

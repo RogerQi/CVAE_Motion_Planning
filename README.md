@@ -16,3 +16,5 @@ TODOs
 - Speed up collision detection
     - Use numpy vectorizaed Ops to support parallel configuration tests
     - BVH?
+- Speed up sampling-based planning with spatial data structures
+    - R-tree/Rebalancing KD-Tree/Ball tree

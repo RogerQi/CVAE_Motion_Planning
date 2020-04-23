@@ -34,7 +34,7 @@ def get_np_arr_hash(np_arr):
     h.reset()
     return ret
 
-def astar_base(start_conf, adj_func, test_goal_func, test_cfree_func, g_func, h_func):
+def astar_base(start_conf, adj_func, test_goal_func, test_cfree_func, metric_func, h_func):
     '''
     Abstract A* solver.
 
@@ -46,7 +46,7 @@ def astar_base(start_conf, adj_func, test_goal_func, test_cfree_func, g_func, h_
         test_goal_func: pointer to a function which returns True if given configuration
             can be considered as goal; False otherwise.
         test_cfree_func: pointer to a function which tests if given configuration is collision-free.
-        g_func: cost function that gives the edge weight between two configuration
+        metric_func: cost function that gives the edge weight between two configuration
         h_func: heuristic function that computes the heuristic of any configuration. Note that
             it does not necessarily need to be admissible.
     '''
@@ -73,7 +73,7 @@ def astar_base(start_conf, adj_func, test_goal_func, test_cfree_func, g_func, h_
                 continue # Already visited this node
             if not test_cfree_func(new_state):
                 continue # collision detected!
-            edge_cost = g_func(cur_node.state, new_state)
+            edge_cost = metric_func(cur_node.state, new_state)
             goal_h = h_func(new_state)
             new_node = node(new_state, cur_node, cur_node.g + edge_cost, goal_h)
             visited_dict[get_np_arr_hash(new_node.state)] = True
@@ -88,8 +88,6 @@ if __name__ == "__main__":
     test_dict[get_np_arr_hash(a.state)] = True
     print(a.state.tostring().hex())
     print(b.state.tostring().hex())
-    print(a.__hash__())
-    print(b.__hash__())
     try:
         test_dict[get_np_arr_hash(b.state)]
         print("success")

@@ -135,7 +135,7 @@ class random_world(base_geometric_world):
 if __name__ == '__main__':
     test_world = random_world(2, 10, "rectangle")
     test_world.plot()
-    astar_soln = test_world.solve("astar")
+    astar_soln = test_world.solve("rrt")
     test_world.plot(soln = astar_soln)
     data = test_world.get_trainable_data()
     print(data[0])

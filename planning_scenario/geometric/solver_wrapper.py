@@ -12,6 +12,7 @@ lib_path = os.path.join(this_dir, '..', '..', 'solver')
 add_path(lib_path)
 
 from astar import astar_base
+from rrt import rrt_base
 
 def get_discrete_coordinate(continuous_coord, eps, h = 1., w = 1.):
     discrete_coord = continuous_coord.copy().reshape((-1, 2))
@@ -103,4 +104,35 @@ def astar_solve(the_world, eps = 0.01):
         return [get_continous_coordinate(s, eps) for s in soln]
     else:
         # No solution found
+        return None
+
+def rrt_solve(the_world, sample_segment = 100):
+    goal_tolerance = 0.1
+    num_robots = len(the_world.robots)
+    robot_radius = the_world.robots[0].radius
+    # State indexing: [robot_id, x/y]
+    initial_state = np.hstack([r.center for r in the_world.robots]).reshape((-1,))
+    goal_state = np.hstack([r.goal for r in the_world.robots]).reshape((-1,))
+    state_shape = initial_state.shape
+
+    def sampling_func():
+        return np.random.random(size = state_shape)
+    
+    def interpolate_func(state_a, state_b):
+        return np.linspace(state_a, state_b, sample_segment)
+    
+    def metric_func(state_a, state_b):
+        dist = euclidean_dist(state_a, state_b)
+        return np.max(dist)
+    
+    def test_goal_func(state_a):
+        return npla.norm(state_a - goal_state) <= goal_tolerance
+    
+    def test_cfree_func(state_a):
+        return the_world.test(state_a)
+    
+    soln = rrt_base(initial_state, sampling_func, interpolate_func, metric_func, test_goal_func, test_cfree_func)
+    if soln is not None:
+        return soln
+    else:
         return None
