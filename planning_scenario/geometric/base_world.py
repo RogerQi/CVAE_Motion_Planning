@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from config import ROBOT_RADIUS
 
-from solver import astar
+import solver_wrapper
 
 class base_geometric_world(object):
     def __init__(self):
@@ -41,7 +41,7 @@ class base_geometric_world(object):
         '''
         assert solver in ["rrt", "prm", "astar", "fmt"]
         if solver == "astar":
-            ret = astar.astar_solve(self)
+            ret = solver_wrapper.astar_solve(self)
             if ret is None:
                 print("No solution found!")
         self.soln_dict[solver] = ret
