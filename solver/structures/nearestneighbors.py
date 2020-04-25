@@ -2,16 +2,17 @@ from __future__ import print_function,division
 from six import iteritems
 from builtins import range
 
-from . import kdtree
+import kdtree
 from .knn import *
 
 #set this to true if you wish to double-check the results of the kd tree
-check_kdtree = False
+check_kdtree = True
 
 infty = float('inf')
 
 class NearestNeighbors:
-    def __init__(self,metric,method='bruteforce'):
+    def __init__(self, metric, method = 'bruteforce'):
+        assert method == 'bruteforce', "KD-tree not working yet"
         self.metric = metric
         self.method = method
         if self.method == 'kdtree':
@@ -32,9 +33,9 @@ class NearestNeighbors:
     def add(self,point,data=None):
         """Adds a point with an associated datum."""
         if self.method == 'kdtree':
-            self.kdtree.add(point,data)
+            self.kdtree.add(point, data)
             self.kdtree.rebalance()
-            if check_kdtree: self.checker.add(point,data)
+            if check_kdtree: self.checker.add(point, data)
         else:
             self.nodes.append((point,data))
 
@@ -79,10 +80,11 @@ class NearestNeighbors:
             res = self.kdtree.nearest(pt,filter)
             if check_kdtree: 
                 rescheck = self.checker.nearest(pt,filter)
-                if res != rescheck:
+                if not (res[0] == rescheck[0]).all():
                     print("KDTree nearest(",pt,") error",res,"should be",rescheck)
                     print(self.metric(res[0],pt))
                     print(self.metric(rescheck[0],pt))
+                    raise ValueError
             return res
         else:
             #brute force
