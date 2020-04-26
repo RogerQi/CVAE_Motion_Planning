@@ -27,7 +27,7 @@ class general_worker(object):
             cur_world = self.func(*self.params)
             soln = cur_world.solve("astar")
             if soln is None: continue
-            all_data = cur_world.get_trainable_data(best_soln = soln, sample_interval = 20)
+            all_data = cur_world.get_trainable_data(soln = soln, sample_interval = 20)
             lock.acquire()
             buffer.append(all_data)
             lock.release()

@@ -91,7 +91,7 @@ class random_world(base_geometric_world):
                 return False
         return True
     
-    def get_trainable_data(self, best_soln = None, sample_interval = 1):
+    def get_trainable_data(self, soln = None, sample_interval = 1):
         '''
         Get data that can be used to train the motion planning CVAE
 
@@ -124,12 +124,12 @@ class random_world(base_geometric_world):
         cond = [initial_conf, goal_conf, obstacle_encode]
         cond = np.concatenate(cond).flatten()
         # Get solution
-        if best_soln is None:
-            best_soln = self.get_best_soln()
-        best_soln = np.array(best_soln).reshape((-1, self.num_robots * 2))
+        if soln is None:
+            soln = self.get_best_soln()
+        soln = np.array(soln).reshape((-1, self.num_robots * 2))
         ret = []
-        for i in range(0, len(best_soln), sample_interval):
-            ret.append((best_soln[i], cond))
+        for i in range(0, len(soln), sample_interval):
+            ret.append((soln[i], cond))
         return ret
 
 if __name__ == '__main__':
