@@ -114,7 +114,7 @@ class NearestNeighbors:
             for p,data in self.nodes:
                 if (filter == None or not filter(p,data)):
                     d = self.metric(p,pt)
-                    res.tryadd(d,(p,data))
+                    res.tryadd((p,data), d)
             return res.sorted_items()
     
     def neighbors(self,pt,radius):
