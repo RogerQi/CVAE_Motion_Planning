@@ -39,13 +39,17 @@ class base_geometric_world(object):
         '''
         Return solution using specified solver
         '''
-        assert solver in ["rrt", "prm", "astar", "fmt"]
+        assert solver in ["rrt", "bidirectional_rrt", "prm", "astar", "fmt"]
         if solver == "astar":
             ret = solver_wrapper.astar_solve(self)
             if ret is None:
                 print("No solution found!")
         elif solver == "rrt":
             ret = solver_wrapper.rrt_solve(self)
+            if ret is None:
+                print("No solution found!")
+        elif solver == "bidirectional_rrt":
+            ret = solver_wrapper.bidirectional_rrt_solve(self)
             if ret is None:
                 print("No solution found!")
         else:
@@ -81,6 +85,11 @@ class base_geometric_world(object):
             pass
         try:
             ret = self.soln_dict['rrt']
+            return ret
+        except KeyError:
+            pass
+        try:
+            ret = self.soln_dict['bidirectional_rrt']
             return ret
         except KeyError:
             pass
