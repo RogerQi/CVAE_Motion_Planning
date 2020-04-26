@@ -75,12 +75,19 @@ class narrow_world(base_geometric_world):
                 return False # Out of bound
             if robot_loc[1] < 0 or robot_loc[1] > 1:
                 return False
-        for o in self.obstacles:
-            for i in range(my_robot_conf.shape[0]):
+        for i in range(my_robot_conf.shape[0]):
+            for o in self.obstacles:
                 cur_robot_center = my_robot_conf[i]
                 robot_radius = self.robots[i].radius
                 if o.robot_collides(cur_robot_center, robot_radius):
                     return False
+        for i in range(my_robot_conf.shape[0]):
+            for r in range(len(self.robots)):
+                if i == r: continue # current robot
+                robot_loc = my_robot_conf[i]
+                robot_radius = self.robots[i].radius
+                if self.robots[r].robot_collides(robot_loc, robot_radius):
+                    return False # collide
         return True
 
     def get_trainable_data(self, soln = None, sample_interval = 1):

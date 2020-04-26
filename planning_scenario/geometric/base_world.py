@@ -20,7 +20,7 @@ class base_geometric_world(object):
     def plot(self, _ax = None, draw_ogrid = True, soln = None):
         ax = _ax
         if _ax is None:
-            fig = plt.figure()
+            fig = plt.figure(figsize = (6, 6))
             ax = fig.add_subplot(111, aspect = 'equal')
         for o in self.obstacles:
             o.draw_matplotlib(ax, alpha = 0.6)
