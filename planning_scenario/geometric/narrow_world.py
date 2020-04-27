@@ -129,9 +129,9 @@ class narrow_world(base_geometric_world):
         return ret
 
 if __name__ == "__main__":
-    test_world = narrow_world(1)
+    test_world = narrow_world(2)
     test_world.plot()
-    soln = test_world.solve("bidirectional_rrt")
+    soln = test_world.solve("bidirectional_rrt_star")
     test_world.plot(soln = soln)
     data = test_world.get_trainable_data()
     print(data[0])
