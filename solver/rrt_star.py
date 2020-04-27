@@ -66,8 +66,11 @@ def bidirectional_rrt_star_base(start_conf, goal_conf, sampling_func, interpolat
         k_nearest_nodes = nn_structure.knearest(sampled_conf, k) # list of (state, node)
         # 1. See if we can connect sampled node to the nearest node
         best_node = None
-        for state_i, node_i in k_nearest_nodes:
-            if not is_path_feasible(sampled_conf, state_i):
+        path_feasible_lut = []
+        for i, (state_i, node_i) in enumerate(k_nearest_nodes):
+            path_feasible_bool = is_path_feasible(sampled_conf, state_i)
+            path_feasible_lut.append(path_feasible_bool)
+            if not path_feasible_bool:
                 continue
             if best_node is None:
                 best_node = node_i
@@ -89,9 +92,8 @@ def bidirectional_rrt_star_base(start_conf, goal_conf, sampling_func, interpolat
         # 2. See if it's possible to link from here to a node in different tree
         #       (RRT*): and also, test if newly sampled conf being the parent of K nearest node
         #                  can decrease cost of that node (has to happen in the same tree).
-        for state_i, node_i in k_nearest_nodes:
-            # TODO: result from previous for-loop can be cached and re-used here
-            if is_path_feasible(new_node.state, node_i.state):
+        for i, (state_i, node_i) in enumerate(k_nearest_nodes):
+            if path_feasible_lut[i]:
                 if node_i.ultimate_root != new_node.ultimate_root:
                     # Add an edge to the graph
                     rrt_graph.add_e(new_node, node_i)
