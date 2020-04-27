@@ -53,7 +53,7 @@ def astar_base(start_conf, adj_func, test_goal_func, test_cfree_func, metric_fun
     assert start_conf.dtype == np.int
     initial_h = h_func(start_conf)
     frontier = [node(start_conf, None, 0, initial_h)]
-    visited_dict = {}
+    visited_dict = {get_np_arr_hash(start_conf): True}
     while len(frontier) > 0:
         cur_node = heapq.heappop(frontier)
         # test if goal
