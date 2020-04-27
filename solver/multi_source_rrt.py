@@ -55,7 +55,7 @@ def multi_source_rrt_base(start_conf, goal_conf, other_root_list, sampling_func,
     nn_structure = NearestNeighbors(metric_func, method = 'bruteforce')
     nn_structure.add(root_node.state, root_node)
     nn_structure.add(goal_node.state, goal_node)
-    rrt_graph = rrt_multi_root_graph(root_node, goal_node)
+    rrt_graph = rrt_multi_root_graph(root_node, goal_node, metric_func)
     for n in other_roots:
         nn_structure.add(n.state, n)
         rrt_graph.add_v(n)
