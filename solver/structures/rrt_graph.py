@@ -1,5 +1,32 @@
 import numpy as np
+import heapq
 from .disjoint_set import disjoint_set
+
+class astar_node(object):
+    def __init__(self, state, parent_node, g, h):
+        self.parent = parent_node
+        self.state = state
+        self.g = g
+        self.h = h
+        self.f = self.g + self.h
+
+    def __lt__(self, other):
+        return self.f < other.f
+
+    def __gt__(self, other):
+        return self.f > other.f
+
+    def __eq__(self, other):
+        return self.f == other.f
+
+    def __le__(self, other):
+        return (self < other) or (self == other)
+    
+    def __ge__(self, other):
+        return (self > other) or (self == other)
+
+    def __hash__(self):
+        return hash(self.state)
 
 class rrt_multi_root_graph(object):
     '''
@@ -21,24 +48,24 @@ class rrt_multi_root_graph(object):
         self.vertices.append(v)
         assigned_id = self.vertex_dset.add_one_and_get_id()
         self.v_to_dset_id[v] = assigned_id
+        self.edge_dict[v] = {}
     
     def add_e(self, node_a, node_b):
         # For hash table purpose. We need to enforce some sort of total ordering
         # Here we use a heuristic: id of the ultimate root of node_a and node_b.
-        if node_a.ultimate_root.id > node_b.ultimate_root.id:
-            node_a, node_b = node_b, node_a # swap
         v_a = node_a.ultimate_root
         v_b = node_b.ultimate_root
         new_edge_cost = node_a.local_cost + node_b.local_cost
         assert v_a in self.vertices and v_b in self.vertices
         try:
-            cur_edge = self.edge_dict[(v_a, v_b)]
+            cur_edge = self.edge_dict[v_a][v_b]
             cur_edge_cost = cur_edge[0].local_cost + cur_edge[1].local_cost
             if new_edge_cost >= cur_edge_cost:
                 return # new edge is not efficient. Do nothing
         except KeyError:
             pass # edge not in graph yet. Add it!
-        self.edge_dict[(v_a, v_b)] = (node_a, node_b)
+        self.edge_dict[v_a][v_b] = (node_a, node_b)
+        self.edge_dict[v_b][v_a] = (node_b, node_a)
         self.vertex_dset.union(self.v_to_dset_id[v_a], self.v_to_dset_id[v_b])
     
     def is_solved(self):
@@ -47,12 +74,7 @@ class rrt_multi_root_graph(object):
     def get_soln(self):
         # TODO: now it's hardcoded for naive bidirectional RRT for testing purpose
         # i.e. the graph will contain only two vertices with one and only one edge.
-        try:
-            self.edge_dict[(self.sink, self.source)] # This should trigger KeyError due to total ordering
-            assert False
-        except KeyError:
-            pass
-        soln_node_a, soln_node_b = self.edge_dict[(self.source, self.sink)]
+        soln_node_a, soln_node_b = self.edge_dict[self.source][self.sink]
         first_path = []
         second_path = []
         cur_node = soln_node_a
