@@ -24,7 +24,7 @@ class node(object):
     def __hash__(self):
         return hash(self.id)
 
-def multi_source_rrt_base(start_conf, goal_conf, other_root_list, sampling_func, interpolate_func,
+def bidirectional_rrt_base(start_conf, goal_conf, sampling_func, interpolate_func,
         metric_func, test_cfree_func, max_iter = 1000000, k = 20):
     '''
     Abstract naive RRT solver.
@@ -32,8 +32,6 @@ def multi_source_rrt_base(start_conf, goal_conf, other_root_list, sampling_func,
     Args:
         start_conf: a numpy array representing start configuration. Assumed collision-free.
         goal_conf: a numpy array representing goal configuration. Assumed collision-free.
-        other_root_list: a list of potentially helpful configuration that will serve as
-            roots of RRT trees.
         sampling_func: a function which samples a point in the configuration space.
             Sidenote: this can be non-uniform!
         metric_func: cost function that gives the edge weight between two configuration
@@ -51,14 +49,10 @@ def multi_source_rrt_base(start_conf, goal_conf, other_root_list, sampling_func,
 
     root_node = node(start_conf, None)
     goal_node = node(goal_conf, None)
-    other_roots = [node(conf, None) for conf in other_root_list]
     nn_structure = NearestNeighbors(metric_func, method = 'bruteforce')
     nn_structure.add(root_node.state, root_node)
     nn_structure.add(goal_node.state, goal_node)
     rrt_graph = rrt_multi_root_graph(root_node, goal_node, metric_func)
-    for n in other_roots:
-        nn_structure.add(n.state, n)
-        rrt_graph.add_v(n)
     # Start iters
     for n_iter in range(max_iter):
         sampled_conf = sampling_func()

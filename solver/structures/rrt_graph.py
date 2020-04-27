@@ -45,8 +45,29 @@ class rrt_multi_root_graph(object):
     
     def is_solved(self):
         return self.vertex_dset.find(0) == self.vertex_dset.find(1)
-    
+
     def get_soln(self):
+        if len(self.vertices) == 2:
+            return self.get_soln_w_only_start_and_goal()
+        else:
+            return self.get_soln_w_astar()
+
+    def get_soln_w_only_start_and_goal(self):
+        soln_node_a, soln_node_b = self.edge_dict[self.source][self.sink]
+        first_path = []
+        second_path = []
+        cur_node = soln_node_a
+        while cur_node is not None:
+            first_path.append(cur_node.state)
+            cur_node = cur_node.parent
+        first_path = first_path[::-1]
+        cur_node = soln_node_b
+        while cur_node is not None:
+            second_path.append(cur_node.state)
+            cur_node = cur_node.parent
+        return first_path + second_path
+    
+    def get_soln_w_astar(self):
         '''
         Perform a A* search on solved graph to obtain a path from source to goal
         '''
