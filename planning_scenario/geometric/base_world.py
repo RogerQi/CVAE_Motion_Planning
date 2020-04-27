@@ -4,6 +4,14 @@ from config import ROBOT_RADIUS
 
 import solver_wrapper
 
+# Solver look-up table sorted in terms of general quality of computed paths.
+solver_lut = [
+    ('astar', solver_wrapper.astar_solve),
+    ('bidirectional_rrt_star', None),
+    ('bidirectional_rrt', solver_wrapper.bidirectional_rrt_solve),
+    ('rrt', solver_wrapper.rrt_solve)
+]
+
 class base_geometric_world(object):
     def __init__(self):
         self.obstacles = [] # instances of geometric objects.
@@ -39,23 +47,14 @@ class base_geometric_world(object):
         '''
         Return solution using specified solver
         '''
-        assert solver in ["rrt", "bidirectional_rrt", "prm", "astar", "fmt"]
-        if solver == "astar":
-            ret = solver_wrapper.astar_solve(self)
-            if ret is None:
-                print("No solution found!")
-        elif solver == "rrt":
-            ret = solver_wrapper.rrt_solve(self)
-            if ret is None:
-                print("No solution found!")
-        elif solver == "bidirectional_rrt":
-            ret = solver_wrapper.bidirectional_rrt_solve(self)
-            if ret is None:
-                print("No solution found!")
-        else:
-            raise NotImplementedError
-        self.soln_dict[solver] = ret
-        return ret
+        for soln_name, soln_func in solver_lut:
+            if solver == soln_name:
+                ret = soln_func(self)
+                if ret is None:
+                    print("No solution found!")
+                self.soln_dict[solver] = ret
+                return ret
+        raise NotImplementedError("Called with unimplemented solver {0}".format(solver))
 
     def get_trainable_data(self):
         raise NotImplementedError
@@ -78,19 +77,9 @@ class base_geometric_world(object):
                     ax.scatter(x, y, color = "red", s = 70, alpha = 0.8)
 
     def get_best_soln(self):
-        try:
-            ret = self.soln_dict['astar']
-            return ret
-        except KeyError:
-            pass
-        try:
-            ret = self.soln_dict['rrt']
-            return ret
-        except KeyError:
-            pass
-        try:
-            ret = self.soln_dict['bidirectional_rrt']
-            return ret
-        except KeyError:
-            pass
-        raise NotImplementedError
+        for soln_name, _ in solver_lut:
+            try:
+                return self.soln_dict[soln_name]
+            except KeyError:
+                pass
+        raise NotImplementedError("Called with unimplemented solver {0}".format(solver))
