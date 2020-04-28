@@ -8,6 +8,7 @@ import solver_wrapper
 solver_lut = [
     ('astar', solver_wrapper.astar_solve),
     ('bidirectional_rrt_star', solver_wrapper.bidirectional_rrt_star_solve),
+    ('FMT*', solver_wrapper.fmt_star_solve),
     ('bidirectional_rrt', solver_wrapper.bidirectional_rrt_solve),
     ('rrt', solver_wrapper.rrt_solve)
 ]

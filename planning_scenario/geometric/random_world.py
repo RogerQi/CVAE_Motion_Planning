@@ -133,9 +133,9 @@ class random_world(base_geometric_world):
         return ret
 
 if __name__ == '__main__':
-    test_world = random_world(2, 10, "rectangle")
+    test_world = random_world(1, 10, "rectangle")
     test_world.plot()
-    soln = test_world.solve("bidirectional_rrt_star")
+    soln = test_world.solve("FMT*")
     test_world.plot(soln = soln)
     data = test_world.get_trainable_data()
     print(data[0])

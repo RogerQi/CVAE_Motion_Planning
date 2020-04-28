@@ -30,9 +30,9 @@ class node(object):
         return hash(self.id)
 
 def bidirectional_rrt_star_base(start_conf, goal_conf, sampling_func, interpolate_func,
-        metric_func, test_cfree_func, max_iter = 1000000, k = 20):
+        metric_func, test_cfree_func, max_iter = 1000000, k = 5):
     '''
-    Abstract naive RRT solver.
+    Abstract bidirectional RRT* solver.
 
     Args:
         start_conf: a numpy array representing start configuration. Assumed collision-free.

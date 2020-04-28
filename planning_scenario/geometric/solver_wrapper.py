@@ -15,6 +15,7 @@ from astar import astar_base
 from rrt import rrt_base
 from bidirectional_rrt import bidirectional_rrt_base
 from rrt_star import bidirectional_rrt_star_base
+from fmt_star import fmt_star_base
 
 def get_discrete_coordinate(continuous_coord, eps, h = 1., w = 1.):
     discrete_coord = continuous_coord.copy().reshape((-1, 2))
@@ -189,6 +190,41 @@ def bidirectional_rrt_star_solve(the_world, sample_segment = 100):
         return the_world.test(state_a)
     
     soln = bidirectional_rrt_star_base(initial_state, goal_state, sampling_func, interpolate_func,
+        metric_func, test_cfree_func)
+    if soln is not None:
+        return soln
+    else:
+        return None
+
+def fmt_star_solve(the_world, sample_segment = 100):
+    goal_tolerance = 0.1
+    num_robots = len(the_world.robots)
+    robot_radius = the_world.robots[0].radius
+    # State indexing: [robot_id, x/y]
+    initial_state = np.hstack([r.center for r in the_world.robots]).reshape((-1,))
+    goal_state = np.hstack([r.goal for r in the_world.robots]).reshape((-1,))
+    state_shape = initial_state.shape
+
+    def sampling_func(size):
+        if len(size) >= 2:
+            return list(np.random.random(size = size))
+        else:
+            return np.random.random(size = size)
+    
+    def interpolate_func(state_a, state_b):
+        return np.linspace(state_a, state_b, sample_segment)
+    
+    def metric_func(state_a, state_b):
+        dist = euclidean_dist(state_a, state_b)
+        return np.max(dist)
+    
+    def test_goal_func(state_a):
+        return npla.norm(state_a - goal_state) <= goal_tolerance
+        
+    def test_cfree_func(state_a):
+        return the_world.test(state_a)
+    
+    soln = fmt_star_base(initial_state, goal_state, test_goal_func, sampling_func, interpolate_func,
         metric_func, test_cfree_func)
     if soln is not None:
         return soln
