@@ -6,7 +6,7 @@ from matplotlib import patches
 
 from config import ROBOT_RADIUS
 from geometric_objects import Rectangle, Circle, Robot
-from base_world import base_geometric_world
+from base_geometric_world import base_geometric_world
 
 class narrow_world(base_geometric_world):
     def __init__(self, num_robots, gap_width_range = None, random_init = False):
@@ -131,7 +131,7 @@ class narrow_world(base_geometric_world):
 if __name__ == "__main__":
     test_world = narrow_world(1)
     test_world.plot()
-    soln = test_world.solve("FMT*")
+    soln = test_world.solve("bRRT*")
     test_world.plot(soln = soln)
     data = test_world.get_trainable_data()
     print(data[0])

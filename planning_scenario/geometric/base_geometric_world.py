@@ -1,19 +1,30 @@
+import sys
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from config import ROBOT_RADIUS
 
+def add_path(custom_path):
+    if custom_path not in sys.path: sys.path.insert(0, custom_path)
+
+this_dir = os.path.dirname(__file__)
+lib_path = os.path.join(this_dir, '..', '..', 'solver')
+add_path(lib_path)
+
+# import from added path
+from base_world import base_world
 import solver_wrapper
 
 # Solver look-up table sorted in terms of general quality of computed paths.
 solver_lut = [
-    ('astar', solver_wrapper.astar_solve),
-    ('bidirectional_rrt_star', solver_wrapper.bidirectional_rrt_star_solve),
+    ('A*', solver_wrapper.astar_solve),
+    ('bRRT*', solver_wrapper.bidirectional_rrt_star_solve),
     ('FMT*', solver_wrapper.fmt_star_solve),
-    ('bidirectional_rrt', solver_wrapper.bidirectional_rrt_solve),
-    ('rrt', solver_wrapper.rrt_solve)
+    ('bRRT', solver_wrapper.bidirectional_rrt_solve),
+    ('RRT', solver_wrapper.rrt_solve)
 ]
 
-class base_geometric_world(object):
+class base_geometric_world(base_world):
     def __init__(self):
         self.obstacles = [] # instances of geometric objects.
         self.robots = []    # instances of gobj.robot

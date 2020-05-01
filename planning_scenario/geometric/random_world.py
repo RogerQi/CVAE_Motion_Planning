@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from config import ROBOT_RADIUS
 from geometric_objects import Rectangle, Circle, Robot
-from base_world import base_geometric_world
+from base_geometric_world import base_geometric_world
 
 class random_world(base_geometric_world):
     '''
