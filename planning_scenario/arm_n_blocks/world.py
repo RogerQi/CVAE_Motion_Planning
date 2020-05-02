@@ -46,11 +46,21 @@ class arm_n_blocks_world(base_world):
             self.goal_conf[4] = 0.64181
             self.goal_conf[5] = math.pi/2.0
 
-
     def test(self, cur_conf):
         return True
 
     def plot(self):
+        '''
+        Plotter
+
+        Return:
+            kvis: klampt kvis display handle
+        '''
+        try:
+            assert get_ipython().__class__.__name__ == 'ZMQInteractiveShell'
+        except (NameError, AssertionError) as e:
+            raise NotImplementedError("Currently, 3D plotting is supported only in jupyter notebook.")
+        # Assume running in jupyter/qt console from this point.
         kvis = KlamptWidget(self.world, width=600, height=400)
         kvis.setCamera({u'near': 0.1,
             u'target':
@@ -65,3 +75,4 @@ class arm_n_blocks_world(base_world):
             u'up': {u'y': 1, u'x': 0, u'z': 0}})
 
         display(kvis)
+        return kvis

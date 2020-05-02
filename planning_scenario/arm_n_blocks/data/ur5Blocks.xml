@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <world>
   <robot name="ur5" file="robots/ur5_with_gripper.rob" rotateZ="-2.3562" translation="0 0 1.12395"  />
-  <terrain file="terrains/block.off" />
+  <terrain name="ground" file="terrains/block.off" />
 <!-- The cart -->
-  <terrain file="terrains/cube.off" scale="0.4191 0.5588 0.04445" translation="0.0508 -0.2794 0.81915">
+  <terrain name="cart_main_board" file="terrains/cube.off" scale="0.4191 0.5588 0.04445" translation="0.0508 -0.2794 0.81915">
      <display color="0.8 0.8 0.8"/>
   </terrain>
-  <terrain file="terrains/cube.off" scale="0.1016 0.1016 1.12395" translation="-0.0508 -0.0508 0">
+  <terrain name="cart_support" file="terrains/cube.off" scale="0.1016 0.1016 1.12395" translation="-0.0508 -0.0508 0">
      <display color="0.8 0.8 0.8"/>
   </terrain>
-  <terrain file="terrains/cube.off" scale="0.9144 0.9144 0.0508" translation="-0.4572 -0.4572 0">
+  <terrain name="cart_bottom" file="terrains/cube.off" scale="0.9144 0.9144 0.0508" translation="-0.4572 -0.4572 0">
      <display color="0.8 0.8 0.8"/>
   </terrain>		
 
 <!-- The "trash can" box -->
-  <terrain file="terrains/cube.off" scale="0.01 0.2 0.1" translation="0.06 -0.25 0.8636"> 
+  <terrain name="box_back" file="terrains/cube.off" scale="0.01 0.2 0.1" translation="0.06 -0.25 0.8636"> 
      <display color="0.2 0.3 0.5"/>
   </terrain>
-  <terrain file="terrains/cube.off" scale="0.4 0.01 0.1" translation="0.06 -0.05 0.8636">
+  <terrain name="box_right" file="terrains/cube.off" scale="0.4 0.01 0.1" translation="0.06 -0.05 0.8636">
      <display color="0.2 0.3 0.5"/>
   </terrain>
-  <terrain file="terrains/cube.off" scale="0.01 0.2 0.1" translation="0.46 -0.25 0.8636"> 
+  <terrain name="box_front" file="terrains/cube.off" scale="0.01 0.2 0.1" translation="0.46 -0.25 0.8636"> 
      <display color="0.2 0.3 0.5"/>
   </terrain>
-  <terrain file="terrains/cube.off" scale="0.4 0.01 0.1" translation="0.06 -0.25 0.8636">
+  <terrain name="box_left" file="terrains/cube.off" scale="0.4 0.01 0.1" translation="0.06 -0.25 0.8636">
      <display color="0.2 0.3 0.5"/>
   </terrain>
 
-  <terrain file="terrains/cube.off" scale="0.4 0.2 0.01" translation="0.06 -0.25 0.8636">
+  <terrain name="box_bottom" file="terrains/cube.off" scale="0.4 0.2 0.01" translation="0.06 -0.25 0.8636">
      <display color="0.2 0.3 0.5"/>
   </terrain>	
 
