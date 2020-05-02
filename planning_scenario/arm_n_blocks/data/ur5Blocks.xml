@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <robot name="ur5" file="robots/ur5_with_gripper.rob" rotateZ="-2.3562" translation="0 0 1.12395"  />
+  <terrain file="terrains/block.off" />
+<!-- The cart -->
+  <terrain file="terrains/cube.off" scale="0.4191 0.5588 0.04445" translation="0.0508 -0.2794 0.81915">
+     <display color="0.8 0.8 0.8"/>
+  </terrain>
+  <terrain file="terrains/cube.off" scale="0.1016 0.1016 1.12395" translation="-0.0508 -0.0508 0">
+     <display color="0.8 0.8 0.8"/>
+  </terrain>
+  <terrain file="terrains/cube.off" scale="0.9144 0.9144 0.0508" translation="-0.4572 -0.4572 0">
+     <display color="0.8 0.8 0.8"/>
+  </terrain>		
+
+<!-- The "trash can" box -->
+  <terrain file="terrains/cube.off" scale="0.01 0.2 0.1" translation="0.06 -0.25 0.8636"> 
+     <display color="0.2 0.3 0.5"/>
+  </terrain>
+  <terrain file="terrains/cube.off" scale="0.4 0.01 0.1" translation="0.06 -0.05 0.8636">
+     <display color="0.2 0.3 0.5"/>
+  </terrain>
+  <terrain file="terrains/cube.off" scale="0.01 0.2 0.1" translation="0.46 -0.25 0.8636"> 
+     <display color="0.2 0.3 0.5"/>
+  </terrain>
+  <terrain file="terrains/cube.off" scale="0.4 0.01 0.1" translation="0.06 -0.25 0.8636">
+     <display color="0.2 0.3 0.5"/>
+  </terrain>
+
+  <terrain file="terrains/cube.off" scale="0.4 0.2 0.01" translation="0.06 -0.25 0.8636">
+     <display color="0.2 0.3 0.5"/>
+  </terrain>	
+
+<!-- Blocks -->
+
+  <rigidObject name="yellow_block" file="objects/block_extra_small.obj"  position="0.2 0.2 0.9" rotateZ="-0.5">
+     <display color="1 1 0"/>
+  </rigidObject> 
+  <rigidObject name="orange_block" file="objects/block_extra_small.obj"  position="0.2 0.1 0.9" rotateZ="0.1">
+     <display color="1 0.5 0"/>
+  </rigidObject> 
+  <rigidObject name="red_block" file="objects/block_extra_small.obj"  position="0.4 0.15 0.9" rotateZ="2.6">
+     <display color="1 0 0"/>
+  </rigidObject> 
+
+  <simulation>
+    <globals /> 
+    <object index="0">
+       <geometry kFriction="0.5" kRestitution="0.7" padding="0.002"/>
+    </object>
+    <object index="1">
+       <geometry kFriction="0.5" kRestitution="0.7" padding="0.002"/>
+    </object>
+    <object index="2">
+       <geometry kFriction="0.5" kRestitution="0.7" padding="0.002"/>
+    </object>
+  </simulation>
+</world>
