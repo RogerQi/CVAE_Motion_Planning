@@ -24,6 +24,10 @@ class arm_n_blocks_world(base_world):
         self.world.readFile(world_config_file)
         self.robot = self.world.robot(0)
 
+        self.obstacles = []
+        for i in range(self.world.numTerrains()):
+            self.obstacles.append(self.world.terrain(i).geometry())
+
         self.initialize(random_plan)
         while not self.test(self.start_conf) or not self.test(self.goal_conf):
             self.initialize(random_plan)
@@ -47,6 +51,16 @@ class arm_n_blocks_world(base_world):
             self.goal_conf[5] = math.pi/2.0
 
     def test(self, cur_conf):
+        self.robot.setConfig(cur_conf)
+        # Test self-collision
+        if self.robot.selfCollides():
+            return False
+        # Test obstacle
+        # for i in range(self.robot.numLinks()):
+        #     geo = self.robot.getLink(i).geometry()
+        #     for o in self.obstacles:
+        #         if geo.collides(o):
+        #             return False
         return True
 
     def plot(self):
