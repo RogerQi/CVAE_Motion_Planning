@@ -26,7 +26,7 @@ class arm_n_blocks_world(base_world):
 
         self.obstacles = []
         for i in range(self.world.numTerrains()):
-            self.obstacles.append(self.world.terrain(i).geometry())
+            self.obstacles.append(self.world.terrain(i))
 
         self.initialize(random_plan)
         while not self.test(self.start_conf) or not self.test(self.goal_conf):
@@ -56,11 +56,14 @@ class arm_n_blocks_world(base_world):
         if self.robot.selfCollides():
             return False
         # Test obstacle
-        # for i in range(self.robot.numLinks()):
-        #     geo = self.robot.getLink(i).geometry()
-        #     for o in self.obstacles:
-        #         if geo.collides(o):
-        #             return False
+        for i in range(self.robot.numLinks()):
+            cur_link = self.robot.link(i)
+            geo = cur_link.geometry()
+            for o in self.obstacles:
+                if i == 0 and o.getName() == "cart_support":
+                    continue # robot bottom base and its support should contact...
+                if geo.collides(o.geometry()):
+                    return False
         return True
 
     def plot(self):
