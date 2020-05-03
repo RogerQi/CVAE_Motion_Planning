@@ -25,7 +25,7 @@ class general_worker(object):
         i = 0
         while i < self.job_num:
             cur_world = self.func(*self.params)
-            soln = cur_world.solve("astar")
+            soln = cur_world.solve("A*")
             if soln is None: continue
             all_data = cur_world.get_trainable_data(soln = soln, sample_interval = 20)
             lock.acquire()
@@ -87,7 +87,7 @@ class geometric_data_gen(object):
 def main():
     n_datapoints = 10000
     num_robots = 1
-    num_worker = 8
+    num_worker = 32
     max_obstacle_cnt = 10
     my_gen = geometric_data_gen(num_worker, num_robots, max_obstacle_cnt, "narrow")
     gen_time_sum = 0
