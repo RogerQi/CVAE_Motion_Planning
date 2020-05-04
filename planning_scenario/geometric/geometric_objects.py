@@ -71,6 +71,40 @@ class Rectangle(object):
                     max(self.bmin[1], min(robot_center[1], self.bmax[1]))])
         return npla.norm(robot_center - closest) <= robot_radius
 
+    def tilted_rect_robot_collides(self, tilted_rect_pt_set):
+        '''
+        Test if any axis can be used as a separating axis. If none of the axis can be used, then objects collide.
+        '''
+        my_pt_set = (self.bmin, (self.bmax[0], self.bmin[1]), self.bmax, (self.bmin[0], self.bmax[1]))
+        # My separating axis
+        for cur_pt_set in (my_pt_set, tilted_rect_pt_set):
+            for i in range(4):
+                pt_a = cur_pt_set[i]
+                pt_b = cur_pt_set[(i + 1) % 4]
+                normal_x = pt_b[1] - pt_a[1]
+                normal_y = pt_a[0] - pt_b[0]
+                # self.rect
+                min_a = None
+                max_a = None
+                for p in my_pt_set:
+                    projected = normal_x * p[0] + normal_y * p[1]
+                    if min_a is None or projected < min_a:
+                        min_a = projected
+                    if max_a is None or projected > max_a:
+                        max_a = projected
+                # Tilted Rect
+                min_b = None
+                max_b = None
+                for p in tilted_rect_pt_set:
+                    projected = normal_x * p[0] + normal_y * p[1]
+                    if min_b is None or projected < min_b:
+                        min_b = projected
+                    if max_b is None or projected > max_b:
+                        max_b = projected
+                if (max_a < min_b) or (max_b < min_a):
+                    return False # no intersection
+        return True
+
     def draw_matplotlib(self, ax, **args):
         if self.dummy_obstacle: return
         ax.add_patch(patches.Rectangle(self.bmin, self.bmax[0]-self.bmin[0], self.bmax[1]-self.bmin[1], **args))
@@ -79,8 +113,11 @@ class Rectangle(object):
         if self.dummy_obstacle: return []
         return [self.bmin, self.bmax]
 
-class tilted_rect(object):
+class tilted_rect_robot(object):
     def __init__(self):
+        pass
+
+    def draw_matplotlib(self, ax, **args):
         pass
 
 def create_obstacles(num):
