@@ -3,6 +3,7 @@ from six import iteritems
 from builtins import range
 
 # import kdtree
+
 from .knn import *
 kdtree = None
 #set this to true if you wish to double-check the results of the kd tree

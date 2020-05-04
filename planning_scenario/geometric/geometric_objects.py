@@ -5,6 +5,9 @@ from matplotlib import patches
 import random
 import numpy as np
 import numpy.linalg as npla
+from config import USE_GPU
+if USE_GPU:
+    import torch
 
 class Circle(object):
     """A circle geometry.  Can collide with circles or rectangles."""
@@ -13,6 +16,7 @@ class Circle(object):
         self.center = center
         self.radius = radius
         self.radius_squared = radius * radius
+        self.dummy_obstacle = False
 
     def contains(self, p):
         return npla.norm(self.center - p) <= self.radius
@@ -37,6 +41,9 @@ class Robot(Circle):
         ax.text(self.center[0], self.center[1], str(self.id))
         ax.add_patch(patches.Circle(self.goal, self.radius, color = "blue", **args))
         ax.text(self.goal[0], self.goal[1], str(self.id))
+    
+    def robot_robot_collides(self, my_center, other_robot_center):
+        return npla.norm(my_center - other_robot_center) <= (self.radius + self.radius)
 
 class Rectangle(object):
     def __init__(self, bmin, bmax):
@@ -69,7 +76,12 @@ class Rectangle(object):
         ax.add_patch(patches.Rectangle(self.bmin, self.bmax[0]-self.bmin[0], self.bmax[1]-self.bmin[1], **args))
     
     def get_parameter(self):
+        if self.dummy_obstacle: return []
         return [self.bmin, self.bmax]
+
+class tilted_rect(object):
+    def __init__(self):
+        pass
 
 def create_obstacles(num):
     obstacles_collection = []
@@ -88,15 +100,11 @@ def create_obstacles(num):
     return obstacles_collection
 
 if __name__ == "__main__":
-    obstacles_collection = create_obstacles(5)
-    # narrow_passage_obstacles = [Rectangle([0.3,0],[0.7,0.4]),Rectangle([0.3,0.6],[0.7,1.0])]
-    count = 0
-    for obstacles in obstacles_collection:
-        plt.figure(figsize=(12,12))
-        plt.axis('equal')
-        plt.xlim(0,1)
-        plt.ylim(0,1)
-        for o in obstacles:
-            o.draw_matplotlib(plt.gca(),color='k')
-        plt.savefig(str(count).zfill(3)+'.png')
-        count += 1
+    obstacles = [Rectangle([0.3,0],[0.7,0.4]),Rectangle([0.3,0.6],[0.7,1.0])]
+    plt.figure(figsize=(8,8))
+    plt.axis('equal')
+    plt.xlim(0,1)
+    plt.ylim(0,1)
+    for o in obstacles:
+        o.draw_matplotlib(plt.gca(),color='k')
+    plt.show()
