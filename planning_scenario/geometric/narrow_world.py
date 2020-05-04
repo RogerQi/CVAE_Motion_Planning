@@ -88,9 +88,7 @@ class narrow_world(base_geometric_world):
         for i in range(my_robot_conf.shape[0]):
             for r in range(len(self.robots)):
                 if i == r: continue # current robot
-                robot_loc = my_robot_conf[i]
-                robot_radius = self.robots[i].radius
-                if self.robots[r].robot_collides(robot_loc, robot_radius):
+                if self.robots[r].robot_robot_collides(my_robot_conf[i], my_robot_conf[r]):
                     return False # collide
         return True
 
@@ -134,7 +132,7 @@ class narrow_world(base_geometric_world):
 
 if __name__ == "__main__":
     test_batch_collision = False
-    num_robots = 1
+    num_robots = 2
     test_world = narrow_world(num_robots)
     test_world.plot()
     cd_module = collision_detection_module(ROBOT_RADIUS)
@@ -152,7 +150,12 @@ if __name__ == "__main__":
                     assert traditional_res == mod_res, "conf: {0}\tbatch res: {1}\ttraditional res: {2}".format(conf, mod_res, traditional_res)
         else:
             # random testing
-            pass
+            conf_list = []
+            for i in range(10000):
+                conf = np.random.random(size = (4,))
+                mod_res = cd_module.batch_feasibility_detect(conf.reshape((1, 2, 2)))
+                traditional_res = test_world.test(conf)
+                assert mod_res == traditional_res, "conf: {0}\tbatch res: {1}\ttraditional res: {2}".format(conf, mod_res, traditional_res)
     soln = test_world.solve("bRRT*")
     test_world.plot(soln = soln)
     data = test_world.get_trainable_data()

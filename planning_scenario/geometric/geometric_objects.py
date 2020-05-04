@@ -41,6 +41,9 @@ class Robot(Circle):
         ax.text(self.center[0], self.center[1], str(self.id))
         ax.add_patch(patches.Circle(self.goal, self.radius, color = "blue", **args))
         ax.text(self.goal[0], self.goal[1], str(self.id))
+    
+    def robot_robot_collides(self, my_center, other_robot_center):
+        return npla.norm(my_center - other_robot_center) <= (self.radius + self.radius)
 
 class Rectangle(object):
     def __init__(self, bmin, bmax):

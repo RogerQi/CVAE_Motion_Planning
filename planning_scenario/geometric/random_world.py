@@ -51,7 +51,7 @@ class random_world(base_geometric_world):
             goal_pt = np.random.random(size = (2,))
             self.robots.append(Robot(start_pt, ROBOT_RADIUS, goal_pt, i))
 
-    def test_one(self, robot_id, robot_loc, test_robot_collision):
+    def test_one(self, robot_id, robot_loc, all_conf, test_robot_collision):
         '''
         Test if the given robot_loc is free of collision. Return True if no collision;
         Otherwise return False
@@ -74,7 +74,7 @@ class random_world(base_geometric_world):
         if test_robot_collision:
             for r in range(len(self.robots)):
                 if r == robot_id: continue # cur testbot
-                if self.robots[r].robot_collides(robot_loc, cur_test_robot.radius):
+                if self.robots[r].robot_robot_collides(robot_loc, all_conf[r]):
                     return False
         return True
     
@@ -87,7 +87,7 @@ class random_world(base_geometric_world):
         '''
         my_robot_conf = robot_conf.reshape((-1, 2))
         for i in range(my_robot_conf.shape[0]):
-            if not self.test_one(i, my_robot_conf[i], True):
+            if not self.test_one(i, my_robot_conf[i], my_robot_conf, True):
                 return False
         return True
     
