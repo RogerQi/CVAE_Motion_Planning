@@ -7,6 +7,7 @@ from matplotlib import patches
 from config import ROBOT_RADIUS
 from geometric_objects import Rectangle, Circle, Robot
 from base_geometric_world import base_geometric_world
+from collision_detection import collision_detection_module
 
 class narrow_world(base_geometric_world):
     def __init__(self, num_robots, gap_width_range = None, random_init = False):
@@ -45,6 +46,9 @@ class narrow_world(base_geometric_world):
             (self.sample_pts[self.vertical_obs_lower_x + 1], self.sample_pts[-1]))
         self.obstacles = [horizontal_left_obstacle, horizontal_middle_obstacle, horizontal_right_obstacle,
             vertical_lower_obstacle, vertical_higher_obstacle]
+        for i in range(len(self.obstacles) - 1, -1, -1):
+            if self.obstacles[i].dummy_obstacle:
+                self.obstacles.pop(i)
         # Initialize robots
         if random_init:
             for i in range(self.num_robots):
@@ -129,8 +133,26 @@ class narrow_world(base_geometric_world):
         return ret
 
 if __name__ == "__main__":
-    test_world = narrow_world(1)
+    test_batch_collision = False
+    num_robots = 1
+    test_world = narrow_world(num_robots)
     test_world.plot()
+    cd_module = collision_detection_module(ROBOT_RADIUS)
+    cd_module._register_obstacle(test_world.obstacles)
+    if test_batch_collision:
+        if num_robots == 1:
+            # Generate samples and test if batch collision detection generate the same result as "slow" detection
+            x_samples = np.linspace(-0.1, 1.1, 100)
+            y_samples = np.linspace(-0.1, 1.1, 100)
+            for x in x_samples:
+                for y in y_samples:
+                    conf = np.array([x, y])
+                    mod_res = cd_module.batch_feasibility_detect(conf.reshape((1, 1, 2)))
+                    traditional_res = test_world.test(conf)
+                    assert traditional_res == mod_res, "conf: {0}\tbatch res: {1}\ttraditional res: {2}".format(conf, mod_res, traditional_res)
+        else:
+            # random testing
+            pass
     soln = test_world.solve("bRRT*")
     test_world.plot(soln = soln)
     data = test_world.get_trainable_data()

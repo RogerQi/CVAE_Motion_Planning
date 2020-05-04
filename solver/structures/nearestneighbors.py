@@ -1,8 +1,6 @@
 from __future__ import print_function,division
 from six import iteritems
 from builtins import range
-
-import kdtree
 from .knn import *
 
 #set this to true if you wish to double-check the results of the kd tree

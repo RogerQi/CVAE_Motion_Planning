@@ -61,7 +61,7 @@ class arm_n_blocks_world(base_world):
             geo = cur_link.geometry()
             for o in self.obstacles:
                 if i == 0 and o.getName() == "cart_support":
-                    continue # robot bottom base and its support should contact...
+                    continue # The contact (or collision) between the robot arm base and its support is fine
                 if geo.collides(o.geometry()):
                     return False
         return True
