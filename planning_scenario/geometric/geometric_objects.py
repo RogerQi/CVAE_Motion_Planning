@@ -22,7 +22,7 @@ class Circle(object):
 
     def draw_matplotlib(self, ax, **args):
         ax.add_patch(patches.Circle(self.center, self.radius, color = "k", **args))
-    
+
     def get_parameter(self):
         return [self.center, self.radius]
 
@@ -31,12 +31,16 @@ class Robot(Circle):
         super(Robot, self).__init__(center, radius)
         self.goal = goal
         self.id = id
+        self.ori = center
 
     def draw_matplotlib(self, ax, **args):
-        ax.add_patch(patches.Circle(self.center, self.radius, color = "red", **args))
-        ax.text(self.center[0], self.center[1], str(self.id))
+        patch = plt.Circle(self.center, self.radius, color = "red", **args)
+        # ax.add_patch(patches.Circle(self.center, self.radius, color = "red", **args))
+        # ax.text(self.center[0], self.center[1], str(self.id))
         ax.add_patch(patches.Circle(self.goal, self.radius, color = "blue", **args))
-        ax.text(self.goal[0], self.goal[1], str(self.id))
+        # ax.text(self.goal[0], self.goal[1], str(self.id))
+        return patch
+
 
 class Rectangle(object):
     def __init__(self, bmin, bmax):
@@ -67,7 +71,7 @@ class Rectangle(object):
     def draw_matplotlib(self, ax, **args):
         if self.dummy_obstacle: return
         ax.add_patch(patches.Rectangle(self.bmin, self.bmax[0]-self.bmin[0], self.bmax[1]-self.bmin[1], **args))
-    
+
     def get_parameter(self):
         return [self.bmin, self.bmax]
 

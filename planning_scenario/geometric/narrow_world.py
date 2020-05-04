@@ -3,6 +3,7 @@ import numpy as np
 import numpy.linalg as npla
 import matplotlib.pyplot as plt
 from matplotlib import patches
+from matplotlib import animation
 
 from config import ROBOT_RADIUS
 from geometric_objects import Rectangle, Circle, Robot
@@ -20,7 +21,7 @@ class narrow_world(base_geometric_world):
         self.soln_dict = {}
         while not (self.test(np.hstack([r.center for r in self.robots])) and self.test(np.hstack([r.goal for r in self.robots]))):
             self.initialize(estimated_res, random_init)
-    
+
     def initialize(self, eps, random_init):
         self.robots = []
         # Initialize obstacles
@@ -129,9 +130,10 @@ class narrow_world(base_geometric_world):
         return ret
 
 if __name__ == "__main__":
-    test_world = narrow_world(1)
-    test_world.plot()
+    test_world = narrow_world(2)
+    # test_world.plot()
     soln = test_world.solve("bRRT*")
-    test_world.plot(soln = soln)
-    data = test_world.get_trainable_data()
-    print(data[0])
+    # test_world.plot(soln = soln)
+    test_world.anim(soln = soln)
+    # data = test_world.get_trainable_data()
+    # print(data[0])

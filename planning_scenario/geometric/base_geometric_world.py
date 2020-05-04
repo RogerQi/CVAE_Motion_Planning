@@ -3,6 +3,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from config import ROBOT_RADIUS
+from matplotlib import animation
 
 def add_path(custom_path):
     if custom_path not in sys.path: sys.path.insert(0, custom_path)
@@ -52,6 +53,56 @@ class base_geometric_world(base_world):
             soln = np.array(soln).reshape((-1, self.num_robots, 2))
             for i in range(self.num_robots):
                 ax.plot(soln[:,i,0], soln[:,i,1])
+        if _ax is None:
+            plt.show()
+
+    def anim(self, _ax = None, draw_ogrid = True, soln = None):
+        ax = _ax
+        if _ax is None:
+            fig = plt.figure(figsize = (6, 6))
+            ax = fig.add_subplot(111, aspect = 'equal')
+        for o in self.obstacles:
+            o.draw_matplotlib(ax, alpha = 0.6)
+        # for r in self.robots:
+        #     r.draw_matplotlib(ax)
+        if draw_ogrid:
+            self.draw_occupany_grid(ax, 20)
+        # for i in range(self.num_robots):
+        #     ax.plot(soln[:,i,0], soln[:,i,1])
+        if soln is not None:
+            soln = np.array(soln).reshape((-1, self.num_robots, 2))
+            patches = []
+            for j in range(self.num_robots):
+                patch = self.robots[j].draw_matplotlib(ax)
+                patches.append(patch)
+
+            def anim_init():
+                for patch in patches:
+                    ax.add_patch(patch)
+                return []
+
+            def anim_manage(i):
+                for j in range(self.num_robots):
+                    anim_animate(i, j, patches[j])
+                return []
+
+            def anim_animate(i, j, patch):
+                step = int(np.floor(i/100))
+                if step == 0:
+                    start = self.robots[j].ori
+                    end = soln[step+1,j]
+                    patch.center = (start[0] + (end[0]-start[0])*(i-step*100)/100, start[1] + (end[1]-start[1])*(i-step*100)/100)
+                elif step < len(soln)-1:
+                    start = soln[step,j]
+                    end = soln[step+1,j]
+                    patch.center = (start[0] + (end[0]-start[0])*(i-step*100)/100, start[1] + (end[1]-start[1])*(i-step*100)/100)
+                return patch,
+
+            anim = animation.FuncAnimation(fig, anim_manage, init_func=anim_init, frames=1500, interval=1, blit=True, repeat=False)
+            Writer = animation.writers['ffmpeg']
+            writer = Writer(fps=200)
+            anim.save('bRRT_1.mp4', writer=writer)
+
         if _ax is None:
             plt.show()
 
