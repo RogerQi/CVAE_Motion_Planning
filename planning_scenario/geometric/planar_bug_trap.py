@@ -15,14 +15,21 @@ lib_path = os.path.join(this_dir, '..', '..', 'solver')
 add_path(lib_path)
 
 from base_world import base_world
+import planar_bug_trap_solver_wrapper
 
-rod_robot_length = 0.15
+# Solver look-up table sorted in terms of general quality of computed paths.
+solver_lut = [
+    ('bRRT*', planar_bug_trap_solver_wrapper.bidirectional_rrt_star_solve),
+    ('bRRT', planar_bug_trap_solver_wrapper.bidirectional_rrt_solve)
+]
+
+rod_robot_length = 0.2
 rod_robot_width = 0.03
 left_bound = 0.2
-right_bound = 0.8
+right_bound = 0.7
 upper_bound = 0.8
 lower_bound = 0.2
-passage_width = 0.2
+passage_width = 0.25
 internal_free_length = 0.25
 rect_thickness = 0.05
 
@@ -46,6 +53,7 @@ class planar_bug_trap_world(base_world):
         assert num_robot == 1, "Only one robot is supported now"
         self.num_robot = num_robot
         self.initialize(random_init)
+        self.soln_dict = {}
         while not self.test(self.start_conf):
             self.initialize(random_init)
     
@@ -75,6 +83,7 @@ class planar_bug_trap_world(base_world):
             self.robots.append(cur_robot)
             self.start_conf += [cur_conf[0, 0], cur_conf[0, 1], scaled_theta]
         self.start_conf = np.array(self.start_conf)
+        self.goal_conf = np.array([0.5, 0.68, 0])
 
     def test(self, robot_conf):
         '''
@@ -116,6 +125,19 @@ class planar_bug_trap_world(base_world):
             r.draw_matplotlib(ax)
         if _ax is None:
             plt.show()
+    
+    def solve(self, solver):
+        '''
+        Return solution using specified solver
+        '''
+        for soln_name, soln_func in solver_lut:
+            if solver == soln_name:
+                ret = soln_func(self)
+                if ret is None:
+                    print("No solution found!")
+                self.soln_dict[solver] = ret
+                return ret
+        raise NotImplementedError("Called with unimplemented solver {0}".format(solver))
 
     def get_trainable_data(self, soln = None, sample_interval = 1):
         # Get Conditional
@@ -127,7 +149,10 @@ class planar_bug_trap_world(base_world):
         pass
 
 if __name__ == '__main__':
-    # np.random.seed(128)
+    # np.random.seed(147)
+    # np.random.seed(148)
     test_world = planar_bug_trap_world(1, False)
     print("Start conf: {}".format(test_world.start_conf))
     test_world.plot()
+    soln = test_world.solve('bRRT')
+    print(soln)
