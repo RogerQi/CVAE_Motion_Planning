@@ -1,3 +1,4 @@
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from matplotlib import patches
@@ -114,11 +115,40 @@ class Rectangle(object):
         return [self.bmin, self.bmax]
 
 class tilted_rect_robot(object):
-    def __init__(self):
-        pass
+    def __init__(self, center, width, length, theta):
+        self.center = center
+        self.width = width
+        self.length = length
+        self.theta = theta
 
     def draw_matplotlib(self, ax, **args):
-        pass
+        bottom_left_pt = (self.center[0] - self.length / 2, self.center[1] - self.width / 2)
+
+        t_start = ax.transData
+        coords = t_start.transform([self.center[0], self.center[1]])
+        print("rotating about theta: {}".format(self.theta))
+        t = mpl.transforms.Affine2D().rotate_around(coords[0], coords[1], self.theta)
+        t_end = t_start + t
+
+        rect = patches.Rectangle(bottom_left_pt, self.length, self.width, color = "red", **args)
+        rect.set_transform(t_end)
+
+        ax.add_patch(rect)
+    
+    @staticmethod
+    def get_pt_set(center, width, length, theta):
+        cos_theta = np.cos(theta) # Cached trigonometry value
+        sin_theta = np.sin(theta)
+        w_half_x_offset = cos_theta * width * 0.5
+        w_half_y_offset = sin_theta * width * 0.5
+        l_half_x_offset = sin_theta * length * 0.5
+        l_half_y_offset = cos_theta * length * 0.5
+        # points
+        pt_a = (center[0] - l_half_x_offset + w_half_x_offset, center[1] - l_half_y_offset - w_half_y_offset)
+        pt_b = (center[0] + l_half_x_offset + w_half_x_offset, center[1] + l_half_y_offset - w_half_y_offset)
+        pt_c = (center[0] + l_half_x_offset - w_half_x_offset, center[1] + l_half_y_offset + w_half_y_offset)
+        pt_d = (center[0] - l_half_x_offset - w_half_x_offset, center[1] - l_half_y_offset + w_half_y_offset)
+        return (pt_a, pt_b, pt_c, pt_d)
 
 def create_obstacles(num):
     obstacles_collection = []
