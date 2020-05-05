@@ -26,5 +26,9 @@ class KNearestResult:
     def maximum_distance(self):
         return self.distances[self.imax]
     def sorted_items(self):
-        sorted_res = sorted([(d,i) for (i,d) in zip(self.items,self.distances) if d!=float('inf')])
-        return [v[1] for v in sorted_res]
+        try:
+            sorted_res = sorted([(d,i) for (i,d) in zip(self.items,self.distances) if d != float('inf')], key = lambda x : x[0])
+            return [v[1] for v in sorted_res]
+        except:
+            from IPython import embed
+            embed()

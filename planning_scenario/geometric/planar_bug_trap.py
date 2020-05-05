@@ -15,16 +15,26 @@ lib_path = os.path.join(this_dir, '..', '..', 'solver')
 add_path(lib_path)
 
 from base_world import base_world
+import planar_bug_trap_solver_wrapper
 
-rod_robot_length = 0.1
-rod_robot_width = 0.05
+# Solver look-up table sorted in terms of general quality of computed paths.
+solver_lut = [
+    ('bRRT*', planar_bug_trap_solver_wrapper.bidirectional_rrt_star_solve),
+    ('bRRT', planar_bug_trap_solver_wrapper.bidirectional_rrt_solve)
+]
+
+rod_robot_length = 0.2
+rod_robot_width = 0.03
 left_bound = 0.2
-right_bound = 0.8
+right_bound = 0.7
 upper_bound = 0.8
 lower_bound = 0.2
-passage_width = 0.2
+passage_width = 0.25
 internal_free_length = 0.25
 rect_thickness = 0.05
+
+def get_rod_robot_conf(num_robot):
+    return np.random.uniform(low = (0, 0, 0), high = (1, 1, np.pi), size = (num_robot, 3))
 
 class planar_bug_trap_world(base_world):
     '''
@@ -39,10 +49,17 @@ class planar_bug_trap_world(base_world):
     |                 |
     |_________________|
     '''
-    def __init__(self, random_init = False):
+    def __init__(self, num_robot, random_init = False):
+        assert num_robot == 1, "Only one robot is supported now"
+        self.num_robot = num_robot
         self.initialize(random_init)
+        self.soln_dict = {}
+        while not self.test(self.start_conf):
+            self.initialize(random_init)
     
     def initialize(self, random_init):
+        self.obstacles = []
+        self.robots = []
         # Compute some numbers
         right_rect_length = (upper_bound - lower_bound - passage_width) / 2
         # Construct rectangles
@@ -56,10 +73,46 @@ class planar_bug_trap_world(base_world):
         middle_upper_rect = Rectangle((left_bound + internal_free_length + rect_thickness, upper_bound - right_rect_length - rect_thickness),
                                     (right_bound, upper_bound - right_rect_length))
         self.obstacles = [left_rect, upper_rect, lower_rect, right_lower_rect, right_upper_rect, middle_lower_rect, middle_upper_rect]
-        self.robot = None
+        self.start_conf = []
+        for r in range(self.num_robot):
+            cur_conf = get_rod_robot_conf(1)
+            unscaled_theta = cur_conf[0, 2]
+            scaled_theta = unscaled_theta / np.pi
+            cur_center = (cur_conf[0,0], cur_conf[0,1])
+            cur_robot = tilted_rect_robot(cur_center, rod_robot_width, rod_robot_length, unscaled_theta)
+            self.robots.append(cur_robot)
+            self.start_conf += [cur_conf[0, 0], cur_conf[0, 1], scaled_theta]
+        self.start_conf = np.array(self.start_conf)
+        self.goal_conf = np.array([0.5, 0.68, 0])
 
     def test(self, robot_conf):
-        pass
+        '''
+        Test the given robot_conf is collision-free.
+
+        Args:
+            robot_conf: np.array of shape (self.num_robots * 3,) that gives a configuration of robots
+        '''
+        my_robot_conf = robot_conf.copy().reshape((-1, 3))
+        my_robot_conf[:,2] *= np.pi # Scale
+        for robot_loc in my_robot_conf:
+            if robot_loc[0] < 0 or robot_loc[0] > 1:
+                return False # Out of bound
+            if robot_loc[1] < 0 or robot_loc[1] > 1:
+                return False
+        for i in range(my_robot_conf.shape[0]):
+            cur_robot_center = my_robot_conf[i,0:2]
+            cur_theta = my_robot_conf[i,2]
+            cur_robot_pt_set = tilted_rect_robot.get_pt_set(cur_robot_center, rod_robot_width, rod_robot_length, cur_theta)
+            for o in self.obstacles:
+                assert isinstance(o, Rectangle)
+                if o.tilted_rect_robot_collides(cur_robot_pt_set):
+                    return False
+        for i in range(my_robot_conf.shape[0]):
+            for r in range(len(self.robots)):
+                if i == r: continue # current robot
+                if self.robots[r].robot_robot_collides(my_robot_conf[i], my_robot_conf[r]):
+                    return False # collide
+        return True
 
     def plot(self, _ax = None, soln = None):
         ax = _ax
@@ -68,10 +121,23 @@ class planar_bug_trap_world(base_world):
             ax = fig.add_subplot(111, aspect = 'equal')
         for o in self.obstacles:
             o.draw_matplotlib(ax, alpha = 0.6)
-        # for r in self.robots:
-        #     r.draw_matplotlib(ax)
+        for r in self.robots:
+            r.draw_matplotlib(ax)
         if _ax is None:
             plt.show()
+    
+    def solve(self, solver):
+        '''
+        Return solution using specified solver
+        '''
+        for soln_name, soln_func in solver_lut:
+            if solver == soln_name:
+                ret = soln_func(self)
+                if ret is None:
+                    print("No solution found!")
+                self.soln_dict[solver] = ret
+                return ret
+        raise NotImplementedError("Called with unimplemented solver {0}".format(solver))
 
     def get_trainable_data(self, soln = None, sample_interval = 1):
         # Get Conditional
@@ -83,5 +149,10 @@ class planar_bug_trap_world(base_world):
         pass
 
 if __name__ == '__main__':
-    test_world = planar_bug_trap_world(False)
+    # np.random.seed(147)
+    # np.random.seed(148)
+    test_world = planar_bug_trap_world(1, False)
+    print("Start conf: {}".format(test_world.start_conf))
     test_world.plot()
+    soln = test_world.solve('bRRT')
+    print(soln)

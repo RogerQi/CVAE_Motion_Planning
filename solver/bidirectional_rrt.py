@@ -41,9 +41,17 @@ def bidirectional_rrt_base(start_conf, goal_conf, sampling_func, interpolate_fun
     # TODO: use more efficient data structures
     def is_path_feasible(conf_a, conf_b):
         eps_pts = interpolate_func(conf_a, conf_b)
+        viable_flag = True
         for test_pt in eps_pts:
             if not test_cfree_func(test_pt):
                 # No viable path...
+                viable_flag = False
+                break
+        if viable_flag:
+            return True
+        second_eps_pts = interpolate_func(conf_a, conf_b, reverse = True)
+        for test_pt in second_eps_pts:
+            if not test_cfree_func(test_pt):
                 return False
         return True
 
