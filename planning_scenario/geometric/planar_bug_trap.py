@@ -16,8 +16,8 @@ add_path(lib_path)
 
 from base_world import base_world
 
-rod_robot_length = 0.2
-rod_robot_width = 0.05
+rod_robot_length = 0.15
+rod_robot_width = 0.03
 left_bound = 0.2
 right_bound = 0.8
 upper_bound = 0.8
@@ -73,9 +73,7 @@ class planar_bug_trap_world(base_world):
             cur_center = (cur_conf[0,0], cur_conf[0,1])
             cur_robot = tilted_rect_robot(cur_center, rod_robot_width, rod_robot_length, unscaled_theta)
             self.robots.append(cur_robot)
-            print("conf center: {}".format(cur_center))
             self.start_conf += [cur_conf[0, 0], cur_conf[0, 1], scaled_theta]
-            print("Start conf: {}".format(self.start_conf))
         self.start_conf = np.array(self.start_conf)
 
     def test(self, robot_conf):
@@ -86,18 +84,18 @@ class planar_bug_trap_world(base_world):
             robot_conf: np.array of shape (self.num_robots * 3,) that gives a configuration of robots
         '''
         my_robot_conf = robot_conf.copy().reshape((-1, 3))
-        my_robot_conf[:2] *= np.pi # Scale
+        my_robot_conf[:,2] *= np.pi # Scale
         for robot_loc in my_robot_conf:
             if robot_loc[0] < 0 or robot_loc[0] > 1:
                 return False # Out of bound
             if robot_loc[1] < 0 or robot_loc[1] > 1:
                 return False
         for i in range(my_robot_conf.shape[0]):
+            cur_robot_center = my_robot_conf[i,0:2]
+            cur_theta = my_robot_conf[i,2]
+            cur_robot_pt_set = tilted_rect_robot.get_pt_set(cur_robot_center, rod_robot_width, rod_robot_length, cur_theta)
             for o in self.obstacles:
                 assert isinstance(o, Rectangle)
-                cur_robot_center = my_robot_conf[i,0:2]
-                cur_theta = my_robot_conf[i,2]
-                cur_robot_pt_set = tilted_rect_robot.get_pt_set(cur_robot_center, rod_robot_width, rod_robot_length, cur_theta)
                 if o.tilted_rect_robot_collides(cur_robot_pt_set):
                     return False
         for i in range(my_robot_conf.shape[0]):
@@ -129,6 +127,7 @@ class planar_bug_trap_world(base_world):
         pass
 
 if __name__ == '__main__':
+    # np.random.seed(128)
     test_world = planar_bug_trap_world(1, False)
     print("Start conf: {}".format(test_world.start_conf))
     test_world.plot()

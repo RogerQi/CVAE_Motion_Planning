@@ -126,7 +126,6 @@ class tilted_rect_robot(object):
 
         t_start = ax.transData
         coords = t_start.transform([self.center[0], self.center[1]])
-        print("rotating about theta: {}".format(self.theta))
         t = mpl.transforms.Affine2D().rotate_around(coords[0], coords[1], self.theta)
         t_end = t_start + t
 
@@ -139,10 +138,10 @@ class tilted_rect_robot(object):
     def get_pt_set(center, width, length, theta):
         cos_theta = np.cos(theta) # Cached trigonometry value
         sin_theta = np.sin(theta)
-        w_half_x_offset = cos_theta * width * 0.5
-        w_half_y_offset = sin_theta * width * 0.5
-        l_half_x_offset = sin_theta * length * 0.5
-        l_half_y_offset = cos_theta * length * 0.5
+        w_half_x_offset = cos_theta * width * 0.5 #Ox cos
+        w_half_y_offset = sin_theta * width * 0.5 #Ox sin
+        l_half_x_offset = cos_theta * length * 0.5 #Oy sin
+        l_half_y_offset = sin_theta * length * 0.5 #Oy cos
         # points
         pt_a = (center[0] - l_half_x_offset + w_half_x_offset, center[1] - l_half_y_offset - w_half_y_offset)
         pt_b = (center[0] + l_half_x_offset + w_half_x_offset, center[1] + l_half_y_offset - w_half_y_offset)
@@ -167,11 +166,18 @@ def create_obstacles(num):
     return obstacles_collection
 
 if __name__ == "__main__":
-    obstacles = [Rectangle([0.3,0],[0.7,0.4]),Rectangle([0.3,0.6],[0.7,1.0])]
+    obstacles = [Rectangle([0.2, 0.2],[0.25,0.8])]
+    tilted_rect = tilted_rect_robot((0.27809911, 0.5359022), 0.03, 0.15, 3.1131204936180885)
+    print(tilted_rect)
+    tilted_pt_set = tilted_rect_robot.get_pt_set(tilted_rect.center, tilted_rect.width, tilted_rect.length, tilted_rect.theta)
+    print("my point set: {}".format(tilted_pt_set))
+    res = obstacles[0].tilted_rect_robot_collides(tilted_pt_set)
+    print("Collision or not: {}".format(res))
     plt.figure(figsize=(8,8))
     plt.axis('equal')
     plt.xlim(0,1)
     plt.ylim(0,1)
     for o in obstacles:
-        o.draw_matplotlib(plt.gca(),color='k')
+        o.draw_matplotlib(plt.gca(),color = 'blue', alpha = 0.4)
+    tilted_rect.draw_matplotlib(plt.gca(), alpha = 0.6)
     plt.show()
